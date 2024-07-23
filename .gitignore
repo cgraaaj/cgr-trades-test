@@ -1,0 +1,7 @@
+GFDLNFO_TICK_03062021/
+cgr-trades-venv/
+logs/
+.ipynb_checkpoints/
+.mypy_cache/
+smart-api-venv/
+.idea/
