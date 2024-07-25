@@ -2,25 +2,33 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 from urllib.parse import quote
+import re
 
 import aiohttp
 import pandas as pd
 import pyotp
 import requests
+import logzero
 from logzero import logger
 from SmartApi.smartConnect import SmartConnect
 from sqlalchemy import create_engine
 
 semaphore = asyncio.Semaphore(1)
+logger.disabled = True
+missed_stocks = []
+
 
 async def get_instrument_data(smartApi, exchange, searchscrip):
     async with semaphore:
-        await asyncio.sleep(0.75)  # Adding delay to simulate throttling
+        await asyncio.sleep(1)  # Adding delay to simulate throttling
         searchScripData = smartApi.searchScrip(exchange, searchscrip)
         # print(searchScripData)
         return searchScripData
 
-async def get_valid_instrument_tickdata(session, symbolToken, interval="1minute", fromDate="2024-07-01", toDate="2024-07-01"):
+
+async def get_valid_instrument_tickdata(
+    session, symbolToken, interval="1minute", fromDate="2024-07-01", toDate="2024-07-01"
+):
     # url = 'https://api.upstox.com/v2/historical-candle/NSE_FO|134606/1minute/2024-07-11/2024-07-1'
     uplinkURL = f"https://api.upstox.com/v2/historical-candle/NSE_FO|{symbolToken}/{interval}/{toDate}/{fromDate}"
     async with session.get(uplinkURL) as response:
@@ -45,9 +53,9 @@ async def get_valid_instrument_tickdata(session, symbolToken, interval="1minute"
                 return df
 
 
-def generate_dates(year, month, holidays, end_date):
+def generate_dates(year, month, sday, holidays, end_date):
     # Get the first and last day of the month
-    start_date = datetime(year, month, 1)
+    start_date = datetime(year, month, sday)
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
     # if month == 12:
     #     end_date = datetime(year + 1, 1, 1) - timedelta(days=1)
@@ -71,62 +79,102 @@ def generate_dates(year, month, holidays, end_date):
 
 
 # Define a function to extract the components
-def extract_components(s):
-    parts = s.split("-")
-    tradedate = parts[0] + "-" + parts[1] + "-" + parts[2]
-    option_details = parts[3]
+def extract_components(instrument):
+    # parts = s.split("-")
+    # tradedate = parts[0] + "-" + parts[1] + "-" + parts[2]
+    # option_details = parts[3]
 
-    # Identify stock name
-    stockname = next(
-        (name for name in stock_names if option_details.startswith(name)), None
-    )
+    # # Identify stock name
+    # stockname = next(
+    #     (name for name in stock_names if option_details.startswith(name)), None
+    # )
 
-    if stockname:
-        len_stockname = len(stockname)
-    else:
-        len_stockname = 0
+    # if stockname:
+    #     len_stockname = len(stockname)
+    # else:
+    #     len_stockname = 0
 
-    # Extract expiry date in the format dd-MMM-yy
-    expiry_date_raw = option_details[len_stockname : len_stockname + 7]  # '25JUL24'
-    expirydate = (
-        expiry_date_raw[:2]
-        + "-"
-        + expiry_date_raw[2:5].upper()
-        + "-"
-        + "20"
-        + expiry_date_raw[5:]
-    )
+    # # Extract expiry date in the format dd-MMM-yy
+    # expiry_date_raw = option_details[len_stockname : len_stockname + 7]  # '25JUL24'
+    # expirydate = (
+    #     expiry_date_raw[:2]
+    #     + "-"
+    #     + expiry_date_raw[2:5].upper()
+    #     + "-"
+    #     + "20"
+    #     + expiry_date_raw[5:]
+    # )
 
-    # Extract strike price
-    strikeprice = "".join(filter(str.isdigit, option_details[len_stockname + 7 :]))
+    # # Extract strike price
+    # strikeprice = "".join(filter(str.isdigit, option_details[len_stockname + 7 :]))
 
-    # Extract option type
-    optiontype = "".join(
-        filter(str.isalpha, option_details[len_stockname + 7 + len(strikeprice) :])
-    )
+    # # Extract option type
+    # optiontype = "".join(
+    #     filter(str.isalpha, option_details[len_stockname + 7 + len(strikeprice) :])
+    # )
 
-    return pd.Series([tradedate, stockname, expirydate, strikeprice, optiontype])
+    # Regex pattern to match the components of the string
+    # ^: Asserts the position at the start of the string.
+    # (\d{4}-\d{2}-\d{2})?-?: Matches the trade date in yyyy-mm-dd format (optional) and an optional hyphen that might precede the stock name.
+    # ([A-Z-&]+): Matches the stock name, allowing uppercase letters, hyphens (-), and ampersands (&).
+    # (\d{2}[A-Z]{3}\d{2}): Matches the expiry date in ddMMMYY format.
+    # (\d+(\.\d+)?): Matches the strike price, allowing for an optional decimal point and digits after it.
+    # ([A-Z]+)$: Matches the option type (one or more uppercase letters) and asserts the position at the end of the string.
+    pattern = r'^(\d{4}-\d{2}-\d{2})?-?([A-Z-&]+)(\d{2}[A-Z]{3}\d{2})(\d+(\.\d+)?)([A-Z]+)$'
+    match = re.match(pattern, instrument)
+    if match:
+        trade_date = match.group(1)
+        stock_name = match.group(2)
+        expiry_date = match.group(3)
+        strike_price = match.group(4)
+        option_type = match.group(6)
+        return pd.Series(
+            [trade_date, stock_name, expiry_date, strike_price, option_type]
+        )
 
+    # return pd.Series([None, None, None, None, None])
+
+def categorize_tradingsymbol(row, stock_names):
+    for name in stock_names:
+        if re.match(f"^{name}", row['tradingsymbol']):
+            return name
+    return None
 
 async def process_stock(smartApi, session, stock, date):
-    print(f'Dumping {stock} on {date}')
-    instrumentData = await get_instrument_data(smartApi, 'NFO', stock)
-    df = pd.DataFrame(instrumentData['data'], columns=['exchange', 'tradingsymbol', 'symboltoken'])
-    curr_mon_df = df[df['tradingsymbol'].str.contains("JUL") & ~df['tradingsymbol'].str.contains("FUT")]
+    print(f"Dumping {stock} on {date}")
+    instrumentData = await get_instrument_data(smartApi, "NFO", stock)
+    df = pd.DataFrame(
+        instrumentData["data"], columns=["exchange", "tradingsymbol", "symboltoken"]
+    )
+    if not df.empty:
+        df['stock_name'] = df.apply(lambda row: categorize_tradingsymbol(row, stock_names), axis=1)
+        curr_mon_df = df[
+            df["tradingsymbol"].str.contains("JUL")
+            & ~df["tradingsymbol"].str.contains("FUT")
+        ]
+        curr_mon_df = curr_mon_df.loc[curr_mon_df["stock_name"]== stock]
+        tasks = [
+            get_valid_instrument_tickdata(session, symbolToken, "1minute", date, date)
+            for symbolToken in curr_mon_df["symboltoken"]
+        ]
+        valid_dfs = await asyncio.gather(*tasks)
 
-    tasks = [get_valid_instrument_tickdata(session, symbolToken, '1minute', date, date) for symbolToken in curr_mon_df['symboltoken']]
-    valid_dfs = await asyncio.gather(*tasks)
+        valid_dfs = [df for df in valid_dfs if (df is not None)]
+        if valid_dfs:
+            res_candle_stick_df = pd.concat(valid_dfs, ignore_index=True)
+        else:
+            res_candle_stick_df = pd.DataFrame()
 
-    valid_dfs = [df for df in valid_dfs if (df is not None)]
-    if valid_dfs:
-        res_candle_stick_df = pd.concat(valid_dfs, ignore_index=True)
+        curr_mon_df["tradingsymbol"] = curr_mon_df["tradingsymbol"].apply(
+            lambda x: date + "-" + x
+        )
+        res_ticker_df = curr_mon_df
+        print(f"Done {stock} on {date}")
+        return res_candle_stick_df, res_ticker_df
     else:
-        res_candle_stick_df = pd.DataFrame()
+        missed_stocks.append(stock)
+        return pd.DataFrame(), pd.DataFrame()
 
-    curr_mon_df['tradingsymbol'] = curr_mon_df['tradingsymbol'].apply(lambda x: date + '-' + x)
-    res_ticker_df = curr_mon_df
-    print(f'Done {stock} on {date}')
-    return res_candle_stick_df, res_ticker_df
 
 stock_names = sorted(
     [
@@ -333,32 +381,33 @@ stock_names = sorted(
 # ] = res_ticker_df["tradingsymbol"].apply(extract_components)
 # ticker_df["ticker_id"] = ticker_df[["ticker_id", "trade_date"]].agg("-".join, axis=1)
 
+
 async def main():
     nse_holidays_2024 = [
-    "2024-01-26",  # Republic Day
-    "2024-03-08",  # Mahashivratri
-    "2024-03-25",  # Holi
-    "2024-03-29",  # Good Friday
-    "2024-04-11",  # Id-Ul-Fitr (Ramadan Eid)
-    "2024-04-17",  # Shri Ram Navmi
-    "2024-05-01",  # Maharashtra Day
-    "2024-06-17",  # Bakri Id
-    "2024-07-17",  # Moharram
-    "2024-08-15",  # Independence Day/Parsi New Year
-    "2024-10-02",  # Mahatma Gandhi Jayanti
-    "2024-11-01",  # Diwali Laxmi Pujan (Muhurat Trading will be conducted)
-    "2024-11-15",  # Gurunanak Jayanti
-    "2024-12-25",  # Christmas
-    "2024-04-14",  # Dr. Baba Saheb Ambedkar Jayanti (Sunday)
-    "2024-04-21",  # Shri Mahavir Jayanti (Sunday)
-    "2024-09-07",  # Ganesh Chaturthi (Saturday)
-    "2024-10-12",  # Dussehra (Saturday)
-    "2024-11-02",  # Diwali-Balipratipada (Saturday)
-]
+        "2024-01-26",  # Republic Day
+        "2024-03-08",  # Mahashivratri
+        "2024-03-25",  # Holi
+        "2024-03-29",  # Good Friday
+        "2024-04-11",  # Id-Ul-Fitr (Ramadan Eid)
+        "2024-04-17",  # Shri Ram Navmi
+        "2024-05-01",  # Maharashtra Day
+        "2024-06-17",  # Bakri Id
+        "2024-07-17",  # Moharram
+        "2024-08-15",  # Independence Day/Parsi New Year
+        "2024-10-02",  # Mahatma Gandhi Jayanti
+        "2024-11-01",  # Diwali Laxmi Pujan (Muhurat Trading will be conducted)
+        "2024-11-15",  # Gurunanak Jayanti
+        "2024-12-25",  # Christmas
+        "2024-04-14",  # Dr. Baba Saheb Ambedkar Jayanti (Sunday)
+        "2024-04-21",  # Shri Mahavir Jayanti (Sunday)
+        "2024-09-07",  # Ganesh Chaturthi (Saturday)
+        "2024-10-12",  # Dussehra (Saturday)
+        "2024-11-02",  # Diwali-Balipratipada (Saturday)
+    ]
     res_candle_stick_df = pd.DataFrame([])
     res_ticker_df = pd.DataFrame([])
 
-    dates = generate_dates(2024, 7, nse_holidays_2024, '2024-07-01')
+    dates = generate_dates(2024, 7, 1, nse_holidays_2024, "2024-07-01")
 
     api_key = "BP42pHUk"
     username = "R60865380"
@@ -387,21 +436,65 @@ async def main():
         res = smartApi.getProfile(refreshToken)
         smartApi.generateToken(refreshToken)
         res = res["data"]["exchanges"]
-
-
+    # for stock in stock_names
     async with aiohttp.ClientSession() as session:
-        tasks = [process_stock(smartApi, session, stock, date) for date in dates for stock in stock_names]
+        tasks = [process_stock(smartApi, session, stock, date) for date in dates for stock in stock_names[:1]]
         results = await asyncio.gather(*tasks)
 
         for candle_stick_df, ticker_df in results:
-            res_candle_stick_df = pd.concat([res_candle_stick_df, candle_stick_df], ignore_index=True)
+            res_candle_stick_df = pd.concat(
+                [res_candle_stick_df, candle_stick_df], ignore_index=True
+            )
             res_ticker_df = pd.concat([res_ticker_df, ticker_df], ignore_index=True)
 
-
     # Save or process the res_candle_stick_df and res_ticker_df as needed
+
+    # DB ACTIVITY
+    # print(res_ticker_df)
+    # print(candle_stick_df)
+
+    # Create a PostgreSQL engine
+    engine = create_engine(
+        "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
+        % quote("sdadmin@postgres")
+    )
+    # Save the DataFrame to a table named 'optstkdata'
+    # curr_mon_df.to_sql('optstkdata',if_exists='append', con=engine, index=True)
+    ticker_df = pd.DataFrame(
+        columns=[
+            "ticker_id",
+            "trade_date",
+            "stock_name",
+            "expiry_date",
+            "strike_price",
+            "option_type",
+        ]
+    )
+    ticker_df[
+        ["trade_date", "stock_name", "expiry_date", "strike_price", "option_type"]
+    ] = res_ticker_df["tradingsymbol"].apply(extract_components)
+    ticker_df["ticker_id"] = res_ticker_df["symboltoken"]
+    ticker_df["ticker_id"] = ticker_df[["ticker_id", "trade_date"]].agg(
+        "-".join, axis=1
+    )
     print("Processing complete.")
-    print(res_candle_stick_df)
-    print(res_ticker_df)
+    test_ticker_df = ticker_df[ticker_df.duplicated(['ticker_id'], keep=False)]
+    print(test_ticker_df)
+    test_res_candle_stick_df = res_candle_stick_df[res_candle_stick_df.duplicated(['ticker_id'], keep=False)]
+    print(test_res_candle_stick_df)
+    # print('stocks that are missed')
+    # print(missed_stocks)
+    # ticker_df.to_sql(
+    #     "ticker", schema="options", if_exists="append", con=engine, index=False
+    # )
+    # res_candle_stick_df.to_sql(
+    #     "candle_stick", schema="options", if_exists="append", con=engine, index=False
+    # )
+    # print("Pushed to DB.")
 
 
 asyncio.run(main())
+
+
+# MCDOWELL-N is not getting any options data from smartapi
+# [I 240725 11:14:48 smartConnect:488] Search successful. No matching trading symbols found for the given query.
