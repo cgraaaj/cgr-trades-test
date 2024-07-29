@@ -3,9 +3,9 @@
 BEGIN;
 
 
-ALTER TABLE IF EXISTS options.ticker DROP CONSTRAINT IF EXISTS stocks_stock_id_fkey;
+ALTER TABLE IF EXISTS options.ticker DROP CONSTRAINT IF EXISTS stock_id_fkey;
 
-ALTER TABLE IF EXISTS options.candle_stick DROP CONSTRAINT IF EXISTS ticker_symbol_token_fkey;
+ALTER TABLE IF EXISTS options.candle_stick DROP CONSTRAINT IF EXISTS ticker_id_fkey;
 
 
 
@@ -13,50 +13,52 @@ DROP TABLE IF EXISTS options.ticker;
 
 CREATE TABLE IF NOT EXISTS options.ticker
 (
-    symbol_token integer NOT NULL,
-    stock_id integer,
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    stock_id uuid,
+    symbol_token integer,
     expiry_date date,
     strike_price numeric,
     option_type character varying,
-    PRIMARY KEY (symbol_token)
+    PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS options.candle_stick;
 
 CREATE TABLE IF NOT EXISTS options.candle_stick
 (
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    ticker_id uuid,
     time_stamp date,
-    symbol_token integer,
     open integer,
     high integer,
     low integer,
     close integer,
     volume bigint,
     open_interest integer,
-    PRIMARY KEY (time_stamp)
+    PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS options.stock;
 
 CREATE TABLE IF NOT EXISTS options.stock
 (
-    stock_id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 ),
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
     name character varying,
     nifty_fifty_index integer,
-    PRIMARY KEY (stock_id)
+    PRIMARY KEY (id)
 );
 
 ALTER TABLE IF EXISTS options.ticker
-    ADD CONSTRAINT stocks_stock_id_fkey FOREIGN KEY (stock_id)
-    REFERENCES options.stock (stock_id) MATCH SIMPLE
+    ADD CONSTRAINT stock_id_fkey FOREIGN KEY (stock_id)
+    REFERENCES options.stock (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
 
 ALTER TABLE IF EXISTS options.candle_stick
-    ADD CONSTRAINT ticker_symbol_token_fkey FOREIGN KEY (symbol_token)
-    REFERENCES options.ticker (symbol_token) MATCH SIMPLE
+    ADD CONSTRAINT ticker_id_fkey FOREIGN KEY (ticker_id)
+    REFERENCES options.ticker (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;

@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timedelta
 from urllib.parse import quote
 import re
+import uuid
 
 import aiohttp
 import pandas as pd
@@ -11,13 +12,35 @@ import requests
 import logzero
 from logzero import logger
 from SmartApi.smartConnect import SmartConnect
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
+from uuid import UUID
 
 semaphore = asyncio.Semaphore(1)
 logger.disabled = True
 missed_stocks = []
 
+NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
+# NAMESPACE_TICKER = '3dbc5dc5-15ce-417c-b896-b0416a604dc2'
+# NAMESPACE_CANDLESTICK = '4692ebad-cb8d-49ed-b91c-82facd1e2f93'
 
+# try catch logic not working!!!
+async def get_instrument_data(smartApi, exchange, searchscrip, retries=5, delay=120):
+    for attempt in range(retries):
+        try:
+            searchScripData = smartApi.searchScrip(exchange, searchscrip)
+            return searchScripData
+        except Exception as e:
+            if "Access denied because of exceeding access rate" in str(e):
+                print(
+                    f"For stock {searchscrip}, {e} {'\n'}So, retrying attempt #{attempt+1} - another retry will occur in {delay} sec"
+                )
+                await asyncio.sleep(delay)
+            else:
+                print(f"An error occurred: {e}")
+                break
+    return None
+
+# working logic with sleep
 async def get_instrument_data(smartApi, exchange, searchscrip):
     async with semaphore:
         await asyncio.sleep(1)  # Adding delay to simulate throttling
@@ -26,11 +49,18 @@ async def get_instrument_data(smartApi, exchange, searchscrip):
         return searchScripData
 
 
+def query_to_dataframe(query, connection):
+    result = connection.execute(text(query))
+    rows = result.fetchall()
+    columns = result.keys()
+    return pd.DataFrame(rows, columns=columns)
+
+
 async def get_valid_instrument_tickdata(
-    session, symbolToken, interval="1minute", fromDate="2024-07-01", toDate="2024-07-01"
+    session, row, interval="1minute", fromDate="2024-07-26", toDate="2024-07-26"
 ):
     # url = 'https://api.upstox.com/v2/historical-candle/NSE_FO|134606/1minute/2024-07-11/2024-07-1'
-    uplinkURL = f"https://api.upstox.com/v2/historical-candle/NSE_FO|{symbolToken}/{interval}/{toDate}/{fromDate}"
+    uplinkURL = f"https://api.upstox.com/v2/historical-candle/NSE_FO|{row.symboltoken}/{interval}/{toDate}/{fromDate}"
     async with session.get(uplinkURL) as response:
         if response.status == 200:
             # await asyncio.sleep(1)  # Adding delay to simulate throttling
@@ -48,8 +78,11 @@ async def get_valid_instrument_tickdata(
                 ],
             )
             if not df.empty:
-                df.insert(1, "ticker_id", symbolToken + "-" + fromDate)
-                df["cs_id"] = df[["ticker_id", "time_stamp"]].agg("-".join, axis=1)
+                df["id"] = [
+                    uuid.uuid5(NAMESPACE_STOCK, str(row.id) + r.time_stamp)
+                    for r in df.itertuples(index=False)
+                ]
+                df["ticker_id"] = row.id
                 return df
 
 
@@ -78,44 +111,59 @@ def generate_dates(year, month, sday, holidays, end_date):
     return formatted_dates
 
 
+def convert_expiry_date(date_str):
+    return datetime.strptime(date_str, "%d%b%y").strftime("%Y-%m-%d")
+
+
 # Define a function to extract the components
 def extract_components(instrument):
-    pattern = r'^(\d{4}-\d{2}-\d{2})?-?([A-Z-&]+)(\d{2}[A-Z]{3}\d{2})(\d+(\.\d+)?)([A-Z]+)$'
+    pattern = r"^([A-Z-&]+)(\d{2}[A-Z]{3}\d{2})(\d+(\.\d+)?)([A-Z]+)$"
     match = re.match(pattern, instrument)
     if match:
-        trade_date = match.group(1)
-        stock_name = match.group(2)
-        expiry_date = match.group(3)
-        strike_price = match.group(4)
-        option_type = match.group(6)
-        return pd.Series(
-            [trade_date, stock_name, expiry_date, strike_price, option_type]
-        )
+        stock_name = match.group(1)
+        expiry_date = convert_expiry_date(match.group(2))
+        strike_price = match.group(3)
+        option_type = match.group(5)
+        return pd.Series([expiry_date, strike_price, option_type])
 
     # return pd.Series([None, None, None, None, None])
 
+
+# search stock LT but LT, LTTS, LTF comes as output
 def categorize_tradingsymbol(row, stock_names):
     for name in stock_names:
-        if re.match(f"^{name}", row['tradingsymbol']):
+        if re.match(f"^{name}", row["tradingsymbol"]):
             return name
     return None
 
-async def process_stock(smartApi, session, stock, date):
+
+async def process_stock(tbl_stock, smartApi, session, stock, expiry_month, date):
     print(f"Dumping {stock} on {date}")
     instrumentData = await get_instrument_data(smartApi, "NFO", stock)
-    df = pd.DataFrame(
-        instrumentData["data"], columns=["exchange", "tradingsymbol", "symboltoken"]
-    )
+    if not None:
+        df = pd.DataFrame(
+            instrumentData["data"], columns=["exchange", "tradingsymbol", "symboltoken"]
+        )
     if not df.empty:
-        df['stock_name'] = df.apply(lambda row: categorize_tradingsymbol(row, stock_names), axis=1)
+        df["stock_name"] = df.apply(
+            lambda row: categorize_tradingsymbol(row, stock_names), axis=1
+        )
         curr_mon_df = df[
-            df["tradingsymbol"].str.contains("JUL")
+            df["tradingsymbol"].str.contains(expiry_month)
             & ~df["tradingsymbol"].str.contains("FUT")
+            & ~df.duplicated(["symboltoken"])
         ]
-        curr_mon_df = curr_mon_df.loc[curr_mon_df["stock_name"]== stock]
+        curr_mon_df = curr_mon_df.loc[curr_mon_df["stock_name"] == stock]
+        curr_mon_df["stock_id"] = tbl_stock[tbl_stock["name"] == stock].iloc[0]["id"]
+        curr_mon_df["id"] = [
+            uuid.uuid5(NAMESPACE_STOCK, str(r.stock_id) + r.tradingsymbol)
+            for r in curr_mon_df.itertuples(index=False)
+        ]
+        res_ticker_df = curr_mon_df
+
         tasks = [
-            get_valid_instrument_tickdata(session, symbolToken, "1minute", date, date)
-            for symbolToken in curr_mon_df["symboltoken"]
+            get_valid_instrument_tickdata(session, row, "1minute", date, date)
+            for row in res_ticker_df.itertuples(index=False)
         ]
         valid_dfs = await asyncio.gather(*tasks)
 
@@ -124,11 +172,7 @@ async def process_stock(smartApi, session, stock, date):
             res_candle_stick_df = pd.concat(valid_dfs, ignore_index=True)
         else:
             res_candle_stick_df = pd.DataFrame()
-
-        curr_mon_df["tradingsymbol"] = curr_mon_df["tradingsymbol"].apply(
-            lambda x: date + "-" + x
-        )
-        res_ticker_df = curr_mon_df
+        # res_candle_stick_df = pd.DataFrame()
         print(f"Done {stock} on {date}")
         return res_candle_stick_df, res_ticker_df
     else:
@@ -256,7 +300,6 @@ stock_names = sorted(
         "MANAPPURAM",
         "MARICO",
         "MARUTI",
-        "MCDOWELL-N",
         "MCX",
         "METROPOLIS",
         "MFSL",
@@ -343,6 +386,18 @@ stock_names = sorted(
 
 
 async def main():
+    # Create a PostgreSQL engine
+    engine = create_engine(
+        "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
+        % quote("sdadmin@postgres")
+    )
+
+    with engine.connect() as connection:
+        # Query to select all from the 'stock' table
+        tbl_stock = query_to_dataframe("SELECT * FROM options.stock", connection)
+
+        # Query to select all from another table, e.g., 'another_table'
+        # another_table_df = query_to_dataframe("SELECT * FROM another_table", connection)
     nse_holidays_2024 = [
         "2024-01-26",  # Republic Day
         "2024-03-08",  # Mahashivratri
@@ -367,7 +422,7 @@ async def main():
     res_candle_stick_df = pd.DataFrame([])
     res_ticker_df = pd.DataFrame([])
 
-    dates = generate_dates(2024, 7, 1, nse_holidays_2024, "2024-07-01")
+    dates = generate_dates(2024, 7, 26, nse_holidays_2024, "2024-07-26")
 
     api_key = "BP42pHUk"
     username = "R60865380"
@@ -398,7 +453,11 @@ async def main():
         res = res["data"]["exchanges"]
     # for stock in stock_names
     async with aiohttp.ClientSession() as session:
-        tasks = [process_stock(smartApi, session, stock, date) for date in dates for stock in stock_names[:1]]
+        tasks = [
+            process_stock(tbl_stock, smartApi, session, stock, "AUG", date)
+            for date in dates
+            for stock in stock_names
+        ]
         results = await asyncio.gather(*tasks)
 
         for candle_stick_df, ticker_df in results:
@@ -407,50 +466,30 @@ async def main():
             )
             res_ticker_df = pd.concat([res_ticker_df, ticker_df], ignore_index=True)
 
-    # Save or process the res_candle_stick_df and res_ticker_df as needed
-
-    # DB ACTIVITY
-    # print(res_ticker_df)
-    # print(candle_stick_df)
-
-    # Create a PostgreSQL engine
-    engine = create_engine(
-        "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
-        % quote("sdadmin@postgres")
-    )
-    # Save the DataFrame to a table named 'optstkdata'
-    # curr_mon_df.to_sql('optstkdata',if_exists='append', con=engine, index=True)
     ticker_df = pd.DataFrame(
         columns=[
-            "ticker_id",
-            "trade_date",
-            "stock_name",
             "expiry_date",
             "strike_price",
             "option_type",
         ]
     )
-    ticker_df[
-        ["trade_date", "stock_name", "expiry_date", "strike_price", "option_type"]
-    ] = res_ticker_df["tradingsymbol"].apply(extract_components)
-    ticker_df["ticker_id"] = res_ticker_df["symboltoken"]
-    ticker_df["ticker_id"] = ticker_df[["ticker_id", "trade_date"]].agg(
-        "-".join, axis=1
+    ticker_df = ticker_df.assign(
+        symbol_token=res_ticker_df["symboltoken"], stock_id=res_ticker_df["stock_id"]
     )
+    ticker_df[["expiry_date", "strike_price", "option_type"]] = res_ticker_df[
+        "tradingsymbol"
+    ].apply(extract_components)
     print("Processing complete.")
-    test_ticker_df = ticker_df[ticker_df.duplicated(['ticker_id'], keep=False)]
-    print(test_ticker_df)
-    test_res_candle_stick_df = res_candle_stick_df[res_candle_stick_df.duplicated(['ticker_id'], keep=False)]
-    print(test_res_candle_stick_df)
-    # print('stocks that are missed')
-    # print(missed_stocks)
-    # ticker_df.to_sql(
-    #     "ticker", schema="options", if_exists="append", con=engine, index=False
-    # )
-    # res_candle_stick_df.to_sql(
-    #     "candle_stick", schema="options", if_exists="append", con=engine, index=False
-    # )
-    # print("Pushed to DB.")
+    ticker_df["id"] = res_ticker_df["id"]
+    ticker_df.set_index("id", inplace=True)
+    ticker_df.to_sql(
+        "ticker", schema="options", if_exists="append", con=engine, index=True
+    )
+    res_candle_stick_df.set_index("id", inplace=True)
+    res_candle_stick_df.to_sql(
+        "candle_stick", schema="options", if_exists="append", con=engine, index=True
+    )
+    print("Pushed to DB.")
 
 
 asyncio.run(main())
