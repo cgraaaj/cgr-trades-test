@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS options.ticker;
 
 CREATE TABLE IF NOT EXISTS options.ticker
 (
-    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    id uuid NOT NULL,
     stock_id uuid,
     symbol_token integer,
     expiry_date date,
@@ -26,9 +26,9 @@ DROP TABLE IF EXISTS options.candle_stick;
 
 CREATE TABLE IF NOT EXISTS options.candle_stick
 (
-    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    id uuid NOT NULL,
     ticker_id uuid,
-    time_stamp date,
+    time_stamp timestamp without time zone,
     open integer,
     high integer,
     low integer,
@@ -42,7 +42,7 @@ DROP TABLE IF EXISTS options.stock;
 
 CREATE TABLE IF NOT EXISTS options.stock
 (
-    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    id uuid NOT NULL,
     name character varying,
     nifty_fifty_index integer,
     PRIMARY KEY (id)

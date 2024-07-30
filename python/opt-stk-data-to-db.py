@@ -1,19 +1,19 @@
 import asyncio
 import json
-from datetime import datetime, timedelta
-from urllib.parse import quote
 import re
 import uuid
+from datetime import datetime, timedelta
+from urllib.parse import quote
+from uuid import UUID
 
 import aiohttp
+import logzero
 import pandas as pd
 import pyotp
 import requests
-import logzero
 from logzero import logger
 from SmartApi.smartConnect import SmartConnect
 from sqlalchemy import create_engine, text
-from uuid import UUID
 
 semaphore = asyncio.Semaphore(1)
 logger.disabled = True
@@ -24,8 +24,10 @@ NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
 # NAMESPACE_CANDLESTICK = '4692ebad-cb8d-49ed-b91c-82facd1e2f93'
 
 # try catch logic not working!!!
-async def get_instrument_data(smartApi, exchange, searchscrip, retries=5, delay=120):
+async def get_instrument_data(smartApi, exchange, searchscrip, retries=5, delay=1):
     for attempt in range(retries):
+        # async with semaphore:
+        print(f"Dumping {searchscrip}")
         try:
             searchScripData = smartApi.searchScrip(exchange, searchscrip)
             return searchScripData
@@ -38,15 +40,15 @@ async def get_instrument_data(smartApi, exchange, searchscrip, retries=5, delay=
             else:
                 print(f"An error occurred: {e}")
                 break
-    return None
+    return []
 
 # working logic with sleep
-async def get_instrument_data(smartApi, exchange, searchscrip):
-    async with semaphore:
-        await asyncio.sleep(1)  # Adding delay to simulate throttling
-        searchScripData = smartApi.searchScrip(exchange, searchscrip)
-        # print(searchScripData)
-        return searchScripData
+# async def get_instrument_data(smartApi, exchange, searchscrip):
+#     async with semaphore:
+#         await asyncio.sleep(1)  # Adding delay to simulate throttling
+#         searchScripData = smartApi.searchScrip(exchange, searchscrip)
+#         # print(searchScripData)
+#         return searchScripData
 
 
 def query_to_dataframe(query, connection):
@@ -138,8 +140,8 @@ def categorize_tradingsymbol(row, stock_names):
 
 
 async def process_stock(tbl_stock, smartApi, session, stock, expiry_month, date):
-    print(f"Dumping {stock} on {date}")
-    instrumentData = await get_instrument_data(smartApi, "NFO", stock)
+    async with semaphore:
+        instrumentData = await get_instrument_data(smartApi, "NFO", stock)
     if not None:
         df = pd.DataFrame(
             instrumentData["data"], columns=["exchange", "tradingsymbol", "symboltoken"]
@@ -422,7 +424,7 @@ async def main():
     res_candle_stick_df = pd.DataFrame([])
     res_ticker_df = pd.DataFrame([])
 
-    dates = generate_dates(2024, 7, 26, nse_holidays_2024, "2024-07-26")
+    dates = generate_dates(2024, 7, 29, nse_holidays_2024, "2024-07-29")
 
     api_key = "BP42pHUk"
     username = "R60865380"
@@ -456,7 +458,7 @@ async def main():
         tasks = [
             process_stock(tbl_stock, smartApi, session, stock, "AUG", date)
             for date in dates
-            for stock in stock_names
+            for stock in stock_names[1:]
         ]
         results = await asyncio.gather(*tasks)
 
@@ -482,9 +484,9 @@ async def main():
     print("Processing complete.")
     ticker_df["id"] = res_ticker_df["id"]
     ticker_df.set_index("id", inplace=True)
-    ticker_df.to_sql(
-        "ticker", schema="options", if_exists="append", con=engine, index=True
-    )
+    # ticker_df.to_sql(
+    #     "ticker", schema="options", if_exists="append", con=engine, index=True
+    # )
     res_candle_stick_df.set_index("id", inplace=True)
     res_candle_stick_df.to_sql(
         "candle_stick", schema="options", if_exists="append", con=engine, index=True
