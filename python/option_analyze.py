@@ -74,14 +74,14 @@ def normalize_df_with_timestamp(df, trade_date):
 
 
 def analyze_trend(ticker_cepe_df):
-    ticker_cepe_df["oi_action_x"] = ticker_cepe_df.apply(
+    ticker_cepe_df.insert(1, "oi_action_x", ticker_cepe_df.apply(
         lambda row: oi_action(row, "ce"), axis=1
-    )
-    ticker_cepe_df["trend_x"] = np.where(
+    ))
+    ticker_cepe_df.insert(1, "trend_x", np.where(
         ticker_cepe_df["oi_action_x"].isin(buillish),
         "Bullish",
         np.where(ticker_cepe_df["oi_action_x"].isin(bearish), "Bearish", None),
-    )
+    ))
     ticker_cepe_df["oi_action_y"] = ticker_cepe_df.apply(
         lambda row: oi_action(row, "pe"), axis=1
     )
@@ -150,6 +150,7 @@ def get_ticker_cepe_df(ticker_df, instrument_row):
     )
     ticker_cepe_df = convert_candlestick_interval(ticker_cepe_df)
     ticker_cepe_df = analyze_trend(ticker_cepe_df)
+    ticker_cepe_df.insert(1, 'strike_price', instrument_row.strike_price)
     return ticker_cepe_df
 
 
@@ -196,6 +197,21 @@ def convert_candlestick_interval(df, new_interval="5T"):
 
     return resampled_df
 
+def get_min_simulation(df):
+    # Calculate the number of records per day and the total number of days
+    records_per_day = 375//5
+    total_records = len(df)
+    total = total_records//records_per_day
+
+    # Create a list to hold the new DataFrames
+    dfs = []
+
+    # Split the DataFrame into daily DataFrames and populate the new DataFrames
+    for i in range(records_per_day):
+        new_df = pd.concat([df.iloc[j*records_per_day + i:j*records_per_day + i + 1] for j in range(total)], ignore_index=True)
+        dfs.append(new_df)
+    return dfs
+
 
 # Query to select all from the 'stock' table
 async def option_analyze(expiry_date="2024-08-29", trade_date="2024-07-26"):
@@ -234,6 +250,9 @@ async def option_analyze(expiry_date="2024-08-29", trade_date="2024-07-26"):
         candle_stick_df.append(get_ticker_cepe_df(ticker_df, row))
     # if valid_dfs:
     candle_stick_df = pd.concat(candle_stick_df, ignore_index=True)
+    # simulate 5 min interval including every strike price
+    candle_stick_df = get_min_simulation(candle_stick_df)
+
     await database.disconnect()
 
 
