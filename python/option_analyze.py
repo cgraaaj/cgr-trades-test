@@ -8,6 +8,10 @@ from urllib.parse import quote
 from uuid import UUID
 import asyncio
 from databases import Database
+import math
+import pickle
+from collections import defaultdict
+
 
 DATABASE_URL = (
     "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
@@ -74,14 +78,18 @@ def normalize_df_with_timestamp(df, trade_date):
 
 
 def analyze_trend(ticker_cepe_df):
-    ticker_cepe_df.insert(1, "oi_action_x", ticker_cepe_df.apply(
-        lambda row: oi_action(row, "ce"), axis=1
-    ))
-    ticker_cepe_df.insert(1, "trend_x", np.where(
-        ticker_cepe_df["oi_action_x"].isin(buillish),
-        "Bullish",
-        np.where(ticker_cepe_df["oi_action_x"].isin(bearish), "Bearish", None),
-    ))
+    ticker_cepe_df.insert(
+        1, "oi_action_x", ticker_cepe_df.apply(lambda row: oi_action(row, "ce"), axis=1)
+    )
+    ticker_cepe_df.insert(
+        1,
+        "trend_x",
+        np.where(
+            ticker_cepe_df["oi_action_x"].isin(buillish),
+            "Bullish",
+            np.where(ticker_cepe_df["oi_action_x"].isin(bearish), "Bearish", None),
+        ),
+    )
     ticker_cepe_df["oi_action_y"] = ticker_cepe_df.apply(
         lambda row: oi_action(row, "pe"), axis=1
     )
@@ -148,9 +156,10 @@ def get_ticker_cepe_df(ticker_df, instrument_row):
         .fillna(0.0)
         .round(2)
     )
-    ticker_cepe_df = convert_candlestick_interval(ticker_cepe_df)
+    # change interval
+    ticker_cepe_df = convert_candlestick_interval(ticker_cepe_df, "15T")
     ticker_cepe_df = analyze_trend(ticker_cepe_df)
-    ticker_cepe_df.insert(1, 'strike_price', instrument_row.strike_price)
+    ticker_cepe_df.insert(1, "strike_price", instrument_row.strike_price)
     return ticker_cepe_df
 
 
@@ -197,33 +206,135 @@ def convert_candlestick_interval(df, new_interval="5T"):
 
     return resampled_df
 
-def get_min_simulation(df):
+
+def get_min_simulation(df, interval=5):
     # Calculate the number of records per day and the total number of days
-    records_per_day = 375//5
+    records_per_day = 375 // interval
     total_records = len(df)
-    total = total_records//records_per_day
+    total = total_records // records_per_day
 
     # Create a list to hold the new DataFrames
     dfs = []
 
     # Split the DataFrame into daily DataFrames and populate the new DataFrames
     for i in range(records_per_day):
-        new_df = pd.concat([df.iloc[j*records_per_day + i:j*records_per_day + i + 1] for j in range(total)], ignore_index=True)
+        new_df = pd.concat(
+            [
+                df.iloc[j * records_per_day + i : j * records_per_day + i + 1]
+                for j in range(total)
+            ],
+            ignore_index=True,
+        )
         dfs.append(new_df)
     return dfs
 
 
+def trend_n_grade_analysis(df):
+    temp = {}
+    no_of_strike_price = len(df)
+    temp["time_stamp"] = df.iloc[0]["time_stamp"]
+    temp["options"] = {
+        "calls": {"bullish": 0, "bearish": 0, "percentage": 0, "grade": ""},
+        "puts": {"bullish": 0, "bearish": 0, "percentage": 0, "grade": ""},
+    }
+    temp["options"]["calls"]["bullish"] = len(df[df["trend_x"] == "Bullish"])
+    temp["options"]["calls"]["bearish"] = len(df[df["trend_x"] == "Bearish"])
+    if temp["options"]["calls"]["bullish"] == 0:
+        temp["options"]["calls"]["percentage"] = 0
+    else:
+        temp["options"]["calls"]["percentage"] = math.ceil(
+            (
+                (
+                    temp["options"]["calls"]["bullish"]
+                    - temp["options"]["calls"]["bearish"]
+                )
+                / temp["options"]["calls"]["bullish"]
+            )
+            * 100
+        )
+    if temp["options"]["calls"]["percentage"] == 100:
+        temp["options"]["calls"]["grade"] = "A"
+    elif (
+        temp["options"]["calls"]["percentage"] > 85
+        and temp["options"]["calls"]["percentage"] < 100
+    ):
+        temp["options"]["calls"]["grade"] = "B"
+    elif (
+        temp["options"]["calls"]["percentage"] > 50
+        and temp["options"]["calls"]["percentage"] <= 85
+    ):
+        temp["options"]["calls"]["grade"] = "C"
+    else:
+        temp["options"]["calls"]["grade"] = "D"
+    # calculate trend none ratio for call
+    temp["options"]["calls"]["tn_ratio"] = math.ceil(
+        (
+            (temp["options"]["calls"]["bullish"] + temp["options"]["calls"]["bearish"])
+            / no_of_strike_price
+        )
+        * 100
+    )
+
+    temp["options"]["puts"]["bullish"] = len(df[df["trend_y"] == "Bullish"])
+    temp["options"]["puts"]["bearish"] = len(df[df["trend_y"] == "Bearish"])
+    if temp["options"]["puts"]["bullish"] == 0:
+        temp["options"]["puts"]["percentage"] = 0
+    else:
+        temp["options"]["puts"]["percentage"] = math.ceil(
+            (
+                (
+                    temp["options"]["puts"]["bullish"]
+                    - temp["options"]["puts"]["bearish"]
+                )
+                / temp["options"]["puts"]["bullish"]
+            )
+            * 100
+        )
+    if temp["options"]["puts"]["percentage"] == 100:
+        temp["options"]["puts"]["grade"] = "A"
+    elif (
+        temp["options"]["puts"]["percentage"] > 85
+        and temp["options"]["puts"]["percentage"] < 100
+    ):
+        temp["options"]["puts"]["grade"] = "B"
+    elif (
+        temp["options"]["puts"]["percentage"] > 50
+        and temp["options"]["puts"]["percentage"] <= 85
+    ):
+        temp["options"]["puts"]["grade"] = "C"
+    else:
+        temp["options"]["puts"]["grade"] = "D"
+    # calculate trend none ratio for put
+    temp["options"]["puts"]["tn_ratio"] = math.ceil(
+        (
+            (temp["options"]["puts"]["bullish"] + temp["options"]["puts"]["bearish"])
+            / no_of_strike_price
+        )
+        * 100
+    )
+
+    temp["callTrend"] = (
+        True
+        if temp["options"]["calls"]["bullish"] > temp["options"]["calls"]["bearish"]
+        else False
+    )
+    temp["putTrend"] = (
+        True
+        if temp["options"]["puts"]["bullish"] > temp["options"]["puts"]["bearish"]
+        else False
+    )
+    return temp
+
+
 # Query to select all from the 'stock' table
-async def option_analyze(expiry_date="2024-08-29", trade_date="2024-07-26"):
-    await database.connect()
-    stock_df = await query_to_dataframe("SELECT * FROM options.stock")
-    # for s_row in stock_df.itertuples():
-    stock_id = "e451a2b6-8863-5cad-975a-674d7ff145bd"
+async def option_analyze(s_row, trade_date="2024-07-26", expiry_date="2024-08-29"):
+    # stock_id = "e451a2b6-8863-5cad-975a-674d7ff145bd"
+    # stock_name = 'AARTIIND'
     instrument_df = await query_to_dataframe(
         f"SELECT id, stock_id, segment, name, exchange, expiry, expiry_epoch, instrument_type, asset_symbol, \
         underlying_symbol, instrument_key, lot_size, freeze_quantity, exchange_token, minimum_lot, asset_key, \
         underlying_key, tick_size, asset_type, underlying_type, trading_symbol, strike_price, weekly \
-        FROM options.instrument where stock_id = uuid('{stock_id}') \
+        FROM options.instrument where stock_id = uuid('{s_row.id}') \
         and expiry = '{expiry_date}' \
         and instrument_type != 'FUT'\
         order by strike_price"
@@ -241,19 +352,19 @@ async def option_analyze(expiry_date="2024-08-29", trade_date="2024-07-26"):
         ).fillna(np.nan)
     ).sort_values("strike_price")
     instrument_df_ce_pe.columns = columns
-    # tasks = [
-    #     get_ticker_cepe_df(ticker_df, row) for row in instrument_df_ce_pe.itertuples()
-    # ]
-    # valid_dfs = await asyncio.gather(*tasks)
     candle_stick_df = []
     for row in instrument_df_ce_pe.itertuples():
         candle_stick_df.append(get_ticker_cepe_df(ticker_df, row))
-    # if valid_dfs:
     candle_stick_df = pd.concat(candle_stick_df, ignore_index=True)
-    # simulate 5 min interval including every strike price
-    candle_stick_df = get_min_simulation(candle_stick_df)
-
-    await database.disconnect()
+    # change interval - simulate 5 min interval including every strike price
+    simaltion_dfs = get_min_simulation(candle_stick_df, 15)
+    simulated_data = []
+    instrument_data = {}
+    instrument_data["name"] = s_row.name
+    for simaltion_df in simaltion_dfs:
+        simulated_data.append(trend_n_grade_analysis(simaltion_df))
+    instrument_data["opt_data"] = simulated_data
+    return instrument_data
 
 
 async def process_instrument(instrument_df, trade_date):
@@ -270,7 +381,112 @@ async def process_instrument(instrument_df, trade_date):
     return ticker_df
 
 
-asyncio.run(option_analyze())
+# def ranking_stocks(stock_data):
+def group_by_attribute(items, key):
+    grouped_dict = defaultdict(list)
+
+    for item in items:
+        group_key = item[key]
+        grouped_dict[group_key].append(item)
+
+    return dict(grouped_dict)
+
+
+def check_consecutive_appearances(grouped_data, threshold=2):
+    # Flatten the grouped data into a sorted list of (timestamp, stock)
+    data = sorted(
+        (timestamp, item["stock"])
+        for timestamp, items in grouped_data.items()
+        for item in items
+    )
+
+    consecutive_counts = defaultdict(int)
+    previous_stock = None
+    previous_timestamp = None
+    count = 0
+    threshold_timestamp = None
+
+    for timestamp, stock in data:
+        if stock == previous_stock:
+            count += 1
+            if count == threshold:
+                threshold_timestamp = timestamp
+        else:
+            if count >= threshold and threshold_timestamp:
+                consecutive_counts[previous_stock] = (count, threshold_timestamp)
+            count = 1
+            threshold_timestamp = None
+
+        previous_stock = stock
+
+    # Final check at the end of the loop
+    if count >= threshold and threshold_timestamp:
+        consecutive_counts[previous_stock] = (count, threshold_timestamp)
+
+    return consecutive_counts
+
+
+def option_ranking(data):
+    # get tn_ratio > 60
+    # get data of every stock on fifteen mins mark
+    c_stocks = []
+    p_stocks = []
+    prediction = {}
+    tn_ratio = 60
+    for t in range(0, 25):
+        for x in range(0, 181):
+            if (data[x]["opt_data"][t]["options"]["calls"]["tn_ratio"] > tn_ratio) & (
+                data[x]["opt_data"][t]["options"]["calls"]["bullish"]
+                > data[x]["opt_data"][t]["options"]["calls"]["bearish"]
+            ):
+                data[x]["opt_data"][t]["stock"] = data[x]["name"]
+                c_stocks.append(data[x]["opt_data"][t])
+            if (data[x]["opt_data"][t]["options"]["puts"]["tn_ratio"] > tn_ratio) & (
+                data[x]["opt_data"][t]["options"]["calls"]["bullish"]
+                > data[x]["opt_data"][t]["options"]["calls"]["bearish"]
+            ):
+                data[x]["opt_data"][t]["stock"] = data[x]["name"]
+                p_stocks.append(data[x]["opt_data"][t])
+    call_prediction = check_consecutive_appearances(
+        group_by_attribute(c_stocks, "time_stamp")
+    )
+    put_prediction = check_consecutive_appearances(
+        group_by_attribute(p_stocks, "time_stamp")
+    )
+    prediction["call"] = {
+        (time_stamp, stock) for stock, (count, time_stamp) in call_prediction.items()
+    }
+    prediction["put"] = {
+        (time_stamp, stock) for stock, (count, time_stamp) in put_prediction.items()
+    }
+    return prediction
+
+
+async def main():
+    await database.connect()
+    stock_df = await query_to_dataframe("SELECT * FROM options.stock")
+    tasks = [
+        option_analyze(s_row, date)
+        for s_row in stock_df.itertuples()
+        for date in [
+            "2024-07-26",
+            "2024-07-29",
+            "2024-07-30",
+            "2024-07-31",
+            "2024-08-01",
+            "2024-08-02",
+        ]
+    ]
+    res_stocks = await asyncio.gather(*tasks)
+    # with open('analyzed_stocks_data.pickle', 'wb') as handle:
+    #     pickle.dump(res_stocks, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    prediction = option_ranking(res_stocks)
+    with open('prediction.pickle', 'wb') as handle:
+        pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    await database.disconnect()
+
+
+asyncio.run(main())
 
 
 # for each stock get stock options id

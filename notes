@@ -1,0 +1,11 @@
+to do:
+
+- calculate none ratio bear+bull/total available strike price
+
+strategy:
+
+- filter stocks on bull trend in 15 min chart till 10 am
+
+rare dates:
+
+2024-08-05

@@ -371,7 +371,7 @@ async def main():
     ]
     ticker_df = pd.DataFrame([])
 
-    dates = generate_dates(2024, 8, 2, nse_holidays_2024, "2024-08-02")
+    dates = generate_dates(2024, 8, 5, nse_holidays_2024, "2024-08-05")
 
     # year = 2024
     # month = 7
