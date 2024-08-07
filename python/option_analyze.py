@@ -475,11 +475,12 @@ async def main():
             "2024-07-31",
             "2024-08-01",
             "2024-08-02",
+            "2024-08-05",
         ]
     ]
     res_stocks = await asyncio.gather(*tasks)
-    # with open('analyzed_stocks_data.pickle', 'wb') as handle:
-    #     pickle.dump(res_stocks, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open('analyzed_stocks_data.pickle', 'wb') as handle:
+        pickle.dump(res_stocks, handle, protocol=pickle.HIGHEST_PROTOCOL)
     prediction = option_ranking(res_stocks)
     with open('prediction.pickle', 'wb') as handle:
         pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)

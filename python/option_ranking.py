@@ -54,7 +54,7 @@ def option_ranking(data):
     prediction = {}
     tn_ratio = 60
     for t in range(0, 25):
-        for x in range(0, 181):
+        for x in range(0, len(data)):
             if (data[x]["opt_data"][t]["options"]["calls"]["tn_ratio"] > tn_ratio) & (
                 data[x]["opt_data"][t]["options"]["calls"]["bullish"]
                 > data[x]["opt_data"][t]["options"]["calls"]["bearish"]
@@ -62,8 +62,8 @@ def option_ranking(data):
                 data[x]["opt_data"][t]["stock"] = data[x]["name"]
                 c_stocks.append(data[x]["opt_data"][t])
             if (data[x]["opt_data"][t]["options"]["puts"]["tn_ratio"] > tn_ratio) & (
-                data[x]["opt_data"][t]["options"]["calls"]["bullish"]
-                > data[x]["opt_data"][t]["options"]["calls"]["bearish"]
+                data[x]["opt_data"][t]["options"]["puts"]["bullish"]
+                > data[x]["opt_data"][t]["options"]["puts"]["bearish"]
             ):
                 data[x]["opt_data"][t]["stock"] = data[x]["name"]
                 p_stocks.append(data[x]["opt_data"][t])
@@ -73,17 +73,17 @@ def option_ranking(data):
     put_prediction = check_consecutive_appearances(
         group_by_attribute(p_stocks, "time_stamp")
     )
-    prediction["call"] = {
+    prediction["call"] = sorted({
         (time_stamp, stock) for stock, (count, time_stamp) in call_prediction.items()
-    }
-    prediction["put"] = {
+    },key=lambda x: x[0])
+    prediction["put"] = sorted({
         (time_stamp, stock) for stock, (count, time_stamp) in put_prediction.items()
-    }
+    },key=lambda x:x[0])
     print(prediction)
 
 
 def main():
-    with open("analyzed_stocks_data_26_07_2024.pickle", "rb") as handle:
+    with open("analyzed_stocks_data.pickle", "rb") as handle:
         data = pickle.load(handle)
     option_ranking(data)
 
