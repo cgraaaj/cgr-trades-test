@@ -1,6 +1,7 @@
 to do:
 
 - calculate none ratio bear+bull/total available strike price
+- maintain log for db entries
 
 strategy:
 

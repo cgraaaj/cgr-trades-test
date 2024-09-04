@@ -434,7 +434,7 @@ def option_ranking(data):
     prediction = {}
     tn_ratio = 60
     for t in range(0, 25):
-        for x in range(0, 181):
+        for x in range(0, len(data)):
             if (data[x]["opt_data"][t]["options"]["calls"]["tn_ratio"] > tn_ratio) & (
                 data[x]["opt_data"][t]["options"]["calls"]["bullish"]
                 > data[x]["opt_data"][t]["options"]["calls"]["bearish"]

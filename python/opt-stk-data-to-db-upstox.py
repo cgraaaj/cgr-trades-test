@@ -5,6 +5,8 @@ import uuid
 from datetime import datetime, timedelta
 from urllib.parse import quote
 from uuid import UUID
+from aiohttp import ClientResponseError
+
 
 import aiohttp
 import logzero
@@ -13,7 +15,7 @@ import pyotp
 import requests
 from logzero import logger
 from sqlalchemy import create_engine, text
-from tenacity import retry, wait_fixed, stop_after_attempt
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 semaphore = asyncio.Semaphore(1)
 logger.disabled = True
@@ -21,6 +23,7 @@ logger.disabled = True
 NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
 # NAMESPACE_TICKER = '3dbc5dc5-15ce-417c-b896-b0416a604dc2'
 # NAMESPACE_CANDLESTICK = '4692ebad-cb8d-49ed-b91c-82facd1e2f93'
+
 
 # Define the retry strategy
 @retry(wait=wait_fixed(2), stop=stop_after_attempt(5))
@@ -371,7 +374,7 @@ async def main():
     ]
     ticker_df = pd.DataFrame([])
 
-    dates = generate_dates(2024, 8, 8, nse_holidays_2024, "2024-08-09")
+    dates = generate_dates(2024, 8, 28, nse_holidays_2024, "2024-08-28")
 
     # year = 2024
     # month = 7
@@ -405,11 +408,11 @@ async def main():
     # instrument_df.to_sql(
     #     "instrument", schema="options", if_exists="append", con=engine, index=True
     # )
-    ticker_df.set_index("id", inplace=True)
-    ticker_df.to_sql(
-        "ticker", schema="options", if_exists="append", con=engine, index=True
-    )
-    print("Pushed to DB.")
+    # ticker_df.set_index("id", inplace=True)
+    # ticker_df.to_sql(
+    #     "ticker", schema="options", if_exists="append", con=engine, index=True
+    # )
+    # print("Pushed to DB.")
 
 
 asyncio.run(main())

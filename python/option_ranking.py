@@ -4,6 +4,9 @@ from datetime import datetime, timedelta
 import pandas as pd
 from iteration_utilities import unique_everseen
 
+
+UPSTOXURL = "https://api.upstox.com/v2/historical-candle/
+
 def group_by_attribute(items, key):
     grouped_dict = defaultdict(list)
 
@@ -85,6 +88,9 @@ def option_ranking(data):
                 data[x]["opt_data"][t]["grade"] = data[x]["opt_data"][t]["options"][
                     "calls"
                 ]["grade"]
+                # find the underlying price and calculate day increase/decrease %
+
+
                 c_stocks.append(data[x]["opt_data"][t])
             if (data[x]["opt_data"][t]["options"]["puts"]["tn_ratio"] > tn_ratio) & (
                 data[x]["opt_data"][t]["options"]["puts"]["bullish"]
@@ -94,6 +100,7 @@ def option_ranking(data):
                 data[x]["opt_data"][t]["grade"] = data[x]["opt_data"][t]["options"][
                     "puts"
                 ]["grade"]
+                # find the underlying price and calculate day increase/decrease %
                 p_stocks.append(data[x]["opt_data"][t])
     call_prediction = check_consecutive_appearances(
         group_by_attribute(c_stocks, "time_stamp")
