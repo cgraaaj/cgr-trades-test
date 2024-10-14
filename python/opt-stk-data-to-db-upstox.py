@@ -15,7 +15,15 @@ import pyotp
 import requests
 from logzero import logger
 from sqlalchemy import create_engine, text
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_fixed,
+    wait_exponential,
+    retry_if_exception_type,
+    RetryError,
+)
+from aiohttp import ClientError
 
 semaphore = asyncio.Semaphore(1)
 logger.disabled = True
@@ -26,13 +34,29 @@ NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
 
 
 # Define the retry strategy
-@retry(wait=wait_fixed(2), stop=stop_after_attempt(5))
+@retry(
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    stop=stop_after_attempt(5),
+    retry=retry_if_exception_type(ClientError),
+)
 async def fetch_data_with_retries(session, uplinkURL):
-    async with session.get(uplinkURL) as response:
-        if response.status == 200:
-            return await response.json()
-        else:
-            response.raise_for_status()
+    try:
+        async with session.get(uplinkURL) as response:
+            if 500 <= response.status < 600:  # Retry on server-side errors (5xx)
+                raise aiohttp.ClientError(f"Server error: {response.status}")
+            if response.status == 200:  # Successful response
+                return await response.json()
+            else:
+                response.raise_for_status()  # For client-side errors (4xx)
+
+    except ClientError as ce:  # Catch network-related errors
+        print(f"ClientError occurred during fetching data: {ce}")
+        raise  # Optionally re-raise or handle differently
+
+    except RetryError as re:  # Catch errors after all retries are exhausted
+        print(f"All retry attempts failed: {re}")
+        raise  # Optionally re-raise or handle differently
+
 
 def query_to_dataframe(query, connection):
     result = connection.execute(text(query))
@@ -66,7 +90,7 @@ async def get_valid_instrument_tickdata(
                 for r in df.itertuples(index=False)
             ]
             df["instrument_id"] = row.id
-            print(f'done with stock {row.name}, instrument {row.trading_symbol}')
+            print(f"done with stock {row.name}, instrument {row.trading_symbol}")
             return df
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -336,7 +360,7 @@ async def main():
 
         # Query to select all from another table, e.g., 'another_table'
         # another_table_df = query_to_dataframe("SELECT * FROM another_table", connection)
-    with open("NSE.json", "r") as file:
+    with open("/home/cgraaaj/Projects/cgr-trades/python/NSE.json", "r") as file:
         data = json.load(file)
 
     # Define the regex pattern for names ending with "NSETEST" preceded by numbers
@@ -374,7 +398,7 @@ async def main():
     ]
     ticker_df = pd.DataFrame([])
 
-    dates = generate_dates(2024, 8, 28, nse_holidays_2024, "2024-08-28")
+    dates = generate_dates(2024, 10, 11, nse_holidays_2024, "2024-10-11")
 
     # year = 2024
     # month = 7
@@ -392,16 +416,14 @@ async def main():
     instrument_df["expiry"] = instrument_df["expiry_epoch"].apply(
         lambda x: convert_epoch_to_date(x)
     )
-    print('Instrument_data processed')
+    print("Instrument_data processed")
 
     async with aiohttp.ClientSession() as session:
         tasks = [process_instrument(instrument_df, session, date) for date in dates]
         results = await asyncio.gather(*tasks)
 
         for candle_stick_df in results:
-            ticker_df = pd.concat(
-                [ticker_df, candle_stick_df], ignore_index=True
-            )
+            ticker_df = pd.concat([ticker_df, candle_stick_df], ignore_index=True)
 
     print("Processing complete.")
     # instrument_df.set_index("id", inplace=True)

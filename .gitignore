@@ -4,4 +4,4 @@ logs/
 .ipynb_checkpoints/
 .mypy_cache/
 smart-api-venv/
-.idea/
+sa/

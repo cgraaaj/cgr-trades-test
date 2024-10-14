@@ -5,7 +5,7 @@ import pandas as pd
 from iteration_utilities import unique_everseen
 
 
-UPSTOXURL = "https://api.upstox.com/v2/historical-candle/
+UPSTOXURL = "https://api.upstox.com/v2/historical-candle/"
 
 def group_by_attribute(items, key):
     grouped_dict = defaultdict(list)
