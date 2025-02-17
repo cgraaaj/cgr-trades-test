@@ -19,4 +19,4 @@ with gzip.open(io.BytesIO(response.content), 'rt', encoding='utf-8') as gz_file:
 with open('NSE.json', 'w', encoding='utf-8') as json_file:
     json.dump(data, json_file, indent=4)
 
-print('File has been downloaded and saved as data.json')
+print('File has been downloaded and saved as NSE.json')

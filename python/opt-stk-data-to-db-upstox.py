@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 from urllib.parse import quote
 from uuid import UUID
 from aiohttp import ClientResponseError
-
+from sqlalchemy.exc import IntegrityError
+import time
 
 import aiohttp
 import logzero
@@ -40,22 +41,23 @@ NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
     retry=retry_if_exception_type(ClientError),
 )
 async def fetch_data_with_retries(session, uplinkURL):
-    try:
-        async with session.get(uplinkURL) as response:
-            if 500 <= response.status < 600:  # Retry on server-side errors (5xx)
-                raise aiohttp.ClientError(f"Server error: {response.status}")
-            if response.status == 200:  # Successful response
-                return await response.json()
-            else:
-                response.raise_for_status()  # For client-side errors (4xx)
+    async with semaphore:
+        try:
+            async with session.get(uplinkURL) as response:
+                if 500 <= response.status < 600:  # Retry on server-side errors (5xx)
+                    raise aiohttp.ClientError(f"Server error: {response.status}")
+                if response.status == 200:  # Successful response
+                    return await response.json()
+                else:
+                    response.raise_for_status()  # For client-side errors (4xx)
 
-    except ClientError as ce:  # Catch network-related errors
-        print(f"ClientError occurred during fetching data: {ce}")
-        raise  # Optionally re-raise or handle differently
+        except ClientError as ce:  # Catch network-related errors
+            print(f"ClientError occurred during fetching data: {ce}")
+            raise  # Optionally re-raise or handle differently
 
-    except RetryError as re:  # Catch errors after all retries are exhausted
-        print(f"All retry attempts failed: {re}")
-        raise  # Optionally re-raise or handle differently
+        except RetryError as re:  # Catch errors after all retries are exhausted
+            print(f"All retry attempts failed: {re}")
+            raise  # Optionally re-raise or handle differently
 
 
 def query_to_dataframe(query, connection):
@@ -66,10 +68,11 @@ def query_to_dataframe(query, connection):
 
 
 async def get_valid_instrument_tickdata(
-    session, row, interval="1minute", fromDate="2024-07-26", toDate="2024-07-26"
+    session, row, interval="1minute", fromDate="2025-01-01", toDate="2025-01-21"
 ):
     # url = 'https://api.upstox.com/v2/historical-candle/NSE_FO|134606/1minute/2024-07-11/2024-07-1'
     uplinkURL = f"https://api.upstox.com/v2/historical-candle/{row.instrument_key}/{interval}/{toDate}/{fromDate}"
+    # print("\n\ntrying stock:\n",row.instrument_key,"\n",interval,"\n",toDate,"\n",fromDate)
     try:
         res = await fetch_data_with_retries(session, uplinkURL)
         df = pd.DataFrame(
@@ -347,6 +350,11 @@ stock_names = sorted(
 )
 
 
+def get_id(x, tbl_stock):
+    name = x.split()[0]
+    filtered_df = tbl_stock[tbl_stock["name"] == name]
+    return filtered_df.iloc[0]["id"]
+
 async def main():
     # Create a PostgreSQL engine
     engine = create_engine(
@@ -375,39 +383,43 @@ async def main():
         and not pattern.search(item.get("name", ""))
     ]
 
-    nse_holidays_2024 = [
-        "2024-01-26",  # Republic Day
-        "2024-03-08",  # Mahashivratri
-        "2024-03-25",  # Holi
-        "2024-03-29",  # Good Friday
-        "2024-04-11",  # Id-Ul-Fitr (Ramadan Eid)
-        "2024-04-17",  # Shri Ram Navmi
-        "2024-05-01",  # Maharashtra Day
-        "2024-06-17",  # Bakri Id
-        "2024-07-17",  # Moharram
-        "2024-08-15",  # Independence Day/Parsi New Year
-        "2024-10-02",  # Mahatma Gandhi Jayanti
-        "2024-11-01",  # Diwali Laxmi Pujan (Muhurat Trading will be conducted)
-        "2024-11-15",  # Gurunanak Jayanti
-        "2024-12-25",  # Christmas
-        "2024-04-14",  # Dr. Baba Saheb Ambedkar Jayanti (Sunday)
-        "2024-04-21",  # Shri Mahavir Jayanti (Sunday)
-        "2024-09-07",  # Ganesh Chaturthi (Saturday)
-        "2024-10-12",  # Dussehra (Saturday)
-        "2024-11-02",  # Diwali-Balipratipada (Saturday)
+    nse_holidays_2025 = [
+            "2025-01-26",  # Republic Day (Sunday)
+            "2025-02-26",  # Mahashivratri
+            "2025-03-14",  # Holi
+            "2025-03-31",  # Id-Ul-Fitr (Ramzan Id)
+            "2025-04-06",  # Shri Ram Navami (Sunday)
+            "2025-04-10",  # Shri Mahavir Jayanti
+            "2025-04-14",  # Dr. Baba Saheb Ambedkar Jayanti
+            "2025-04-18",  # Good Friday
+            "2025-05-01",  # Maharashtra Day
+            "2025-06-07",  # Bakri Id (Saturday)
+            "2025-07-06",  # Muharram (Sunday)
+            "2025-08-15",  # Independence Day
+            "2025-08-27",  # Ganesh Chaturthi
+            "2025-10-02",  # Mahatma Gandhi Jayanti/Dussehra
+            "2025-10-21",  # Diwali Laxmi Pujan (Muhurat Trading will be conducted)
+            "2025-10-22",  # Diwali Balipratipada
+            "2025-11-05",  # Prakash Gurpurb (Guru Nanak Jayanti)
+            "2025-12-25",  # Christmas
     ]
     ticker_df = pd.DataFrame([])
 
-    dates = generate_dates(2024, 10, 11, nse_holidays_2024, "2024-10-11")
+    dates = generate_dates(2025, 2, 14, nse_holidays_2025, "2025-02-14")
 
     # year = 2024
     # month = 7
     # end_date = 2024-07-02
 
     instrument_df = pd.DataFrame(instrument_data)
-    instrument_df["stock_id"] = instrument_df["trading_symbol"].apply(
-        lambda x: tbl_stock[tbl_stock["name"] == x.split()[0]].iloc[0]["id"]
-    )
+    # instrument_df["stock_id"] = instrument_df["trading_symbol"].apply(
+    #     lambda x: tbl_stock[tbl_stock["name"] == x.split()[0]].iloc[0]["id"]
+    # )
+
+    instrument_df["stock_id"] = instrument_df["trading_symbol"].apply(lambda x: get_id(x, tbl_stock))
+
+    # print("Missing names:", missing_names)
+
     instrument_df["id"] = [
         uuid.uuid5(NAMESPACE_STOCK, str(r.stock_id) + r.trading_symbol)
         for r in instrument_df.itertuples(index=False)
@@ -426,15 +438,45 @@ async def main():
             ticker_df = pd.concat([ticker_df, candle_stick_df], ignore_index=True)
 
     print("Processing complete.")
-    # instrument_df.set_index("id", inplace=True)
-    # instrument_df.to_sql(
-    #     "instrument", schema="options", if_exists="append", con=engine, index=True
-    # )
-    # ticker_df.set_index("id", inplace=True)
-    # ticker_df.to_sql(
-    #     "ticker", schema="options", if_exists="append", con=engine, index=True
-    # )
-    # print("Pushed to DB.")
+    existing_ids = pd.read_sql("SELECT id FROM options.instrument", engine)['id'].apply(lambda x: str(x)).tolist()
+    instrument_df_filtered = instrument_df[~instrument_df['id'].isin(existing_ids)]
+    instrument_df.set_index("id", inplace=True)
+
+    # Insert only new data
+    instrument_df_filtered.to_sql(
+        "instrument", schema="options", if_exists="append", con=engine, index=False
+    )
+
+    # try:
+    #     instrument_df.to_sql(
+    #         "instrument", schema="options", if_exists="append", con=engine, index=True
+    #     )
+    # except IntegrityError as e:
+    #     # Check if the error is specifically a duplicate key violation
+    #     if "duplicate key value violates unique constraint \"instrument_pkey\"" in str(e.orig):
+    #         print("Duplicate entry detected, continuing...")
+    #     else:
+    #         # Raise the error if it's not the one we're looking for
+    #         raise e
+
+    print("Instrument Pushed to DB.")
+    ticker_df.set_index("id", inplace=True)
+    ticker_df.to_sql(
+        "ticker",
+        schema="options",
+        if_exists="append",
+        con=engine,
+        index=True,
+        chunksize=5000,
+    )
+    print("Ticker Pushed to DB.")
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    start_time = time.time()  # Record the start time
+    asyncio.run(main())  # Run your main async function
+    end_time = time.time()  # Record the end time
+
+    execution_time_seconds = end_time - start_time  # Calculate the execution time
+    execution_time_minutes = execution_time_seconds / 60  # Convert to minutes
+    print(f"Execution time: {execution_time_minutes:.2f} minutes")

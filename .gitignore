@@ -5,3 +5,5 @@ logs/
 .mypy_cache/
 smart-api-venv/
 sa/
+*.json
+*.csv
