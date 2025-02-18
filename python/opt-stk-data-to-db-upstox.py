@@ -8,7 +8,8 @@ from uuid import UUID
 from aiohttp import ClientResponseError
 from sqlalchemy.exc import IntegrityError
 import time
-
+from tqdm.asyncio import tqdm_asyncio
+from tqdm import tqdm
 import aiohttp
 import logzero
 import pandas as pd
@@ -93,7 +94,7 @@ async def get_valid_instrument_tickdata(
                 for r in df.itertuples(index=False)
             ]
             df["instrument_id"] = row.id
-            print(f"done with stock {row.name}, instrument {row.trading_symbol}")
+            # print(f"done with stock {row.name}, instrument {row.trading_symbol}")
             return df
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -104,10 +105,6 @@ def generate_dates(year, month, sday, holidays, end_date):
     # Get the first and last day of the month
     start_date = datetime(year, month, sday)
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
-    # if month == 12:
-    #     end_date = datetime(year + 1, 1, 1) - timedelta(days=1)
-    # else:
-    #     end_date = datetime(year, month + 1, 1) - timedelta(days=1)
 
     # Generate all dates in the month
     all_dates = pd.date_range(start=start_date, end=end_date).tolist()
@@ -152,208 +149,37 @@ async def process_instrument(instrument_df, session, date):
         get_valid_instrument_tickdata(session, row, "1minute", date, date)
         for row in instrument_df.itertuples(index=False)
     ]
-    valid_dfs = await asyncio.gather(*tasks)
-    valid_dfs = [df for df in valid_dfs if (df is not None)]
-    if valid_dfs:
-        candle_stick_df = pd.concat(valid_dfs, ignore_index=True)
-    else:
-        candle_stick_df = pd.DataFrame()
+
+    valid_dfs = []
+    
+    # Use tqdm to show progress
+    for future in tqdm_asyncio(asyncio.as_completed(tasks), total=len(tasks), desc="Processing instruments"):
+        df = await future
+        if df is not None:
+            valid_dfs.append(df)
+    
+    candle_stick_df = pd.concat(valid_dfs, ignore_index=True) if valid_dfs else pd.DataFrame()
+    
     return candle_stick_df
-
-
-stock_names = sorted(
-    [
-        "AARTIIND",
-        "ABB",
-        "ABBOTINDIA",
-        "ABCAPITAL",
-        "ABFRL",
-        "ACC",
-        "ADANIENT",
-        "ADANIPORTS",
-        "ALKEM",
-        "AMBUJACEM",
-        "APOLLOHOSP",
-        "APOLLOTYRE",
-        "ASHOKLEY",
-        "ASIANPAINT",
-        "ASTRAL",
-        "ATUL",
-        "AUBANK",
-        "AUROPHARMA",
-        "AXISBANK",
-        "BAJAJ-AUTO",
-        "BAJAJFINSV",
-        "BAJFINANCE",
-        "BALKRISIND",
-        "BALRAMCHIN",
-        "BANDHANBNK",
-        "BANKBARODA",
-        "BATAINDIA",
-        "BEL",
-        "BERGEPAINT",
-        "BHARATFORG",
-        "BHARTIARTL",
-        "BHEL",
-        "BIOCON",
-        "BOSCHLTD",
-        "BPCL",
-        "BRITANNIA",
-        "BSOFT",
-        "CANBK",
-        "CANFINHOME",
-        "CHAMBLFERT",
-        "CHOLAFIN",
-        "CIPLA",
-        "COALINDIA",
-        "COFORGE",
-        "COLPAL",
-        "CONCOR",
-        "COROMANDEL",
-        "CROMPTON",
-        "CUB",
-        "CUMMINSIND",
-        "DABUR",
-        "DALBHARAT",
-        "DEEPAKNTR",
-        "DIVISLAB",
-        "DIXON",
-        "DLF",
-        "DRREDDY",
-        "EICHERMOT",
-        "ESCORTS",
-        "EXIDEIND",
-        "FEDERALBNK",
-        "GAIL",
-        "GLENMARK",
-        "GMRINFRA",
-        "GNFC",
-        "GODREJCP",
-        "GODREJPROP",
-        "GRANULES",
-        "GRASIM",
-        "GUJGASLTD",
-        "HAL",
-        "HAVELLS",
-        "HCLTECH",
-        "HDFCAMC",
-        "HDFCBANK",
-        "HDFCLIFE",
-        "HEROMOTOCO",
-        "HINDALCO",
-        "HINDCOPPER",
-        "HINDPETRO",
-        "HINDUNILVR",
-        "ICICIBANK",
-        "ICICIGI",
-        "ICICIPRULI",
-        "IDEA",
-        "IDFC",
-        "IDFCFIRSTB",
-        "IEX",
-        "IGL",
-        "INDHOTEL",
-        "INDIACEM",
-        "INDIAMART",
-        "INDIGO",
-        "INDUSINDBK",
-        "INDUSTOWER",
-        "INFY",
-        "IOC",
-        "IPCALAB",
-        "IRCTC",
-        "ITC",
-        "JINDALSTEL",
-        "JKCEMENT",
-        "JSWSTEEL",
-        "JUBLFOOD",
-        "KOTAKBANK",
-        "LALPATHLAB",
-        "LAURUSLABS",
-        "LICHSGFIN",
-        "LT",
-        "LTF",
-        "LTIM",
-        "LTTS",
-        "LUPIN",
-        "M&M",
-        "M&MFIN",
-        "MANAPPURAM",
-        "MARICO",
-        "MARUTI",
-        "MCX",
-        "METROPOLIS",
-        "MFSL",
-        "MGL",
-        "MOTHERSON",
-        "MPHASIS",
-        "MRF",
-        "MUTHOOTFIN",
-        "NATIONALUM",
-        "NAUKRI",
-        "NAVINFLUOR",
-        "NESTLEIND",
-        "NMDC",
-        "NTPC",
-        "OBEROIRLTY",
-        "OFSS",
-        "ONGC",
-        "PAGEIND",
-        "PEL",
-        "PERSISTENT",
-        "PETRONET",
-        "PFC",
-        "PIDILITIND",
-        "PIIND",
-        "PNB",
-        "POLYCAB",
-        "POWERGRID",
-        "PVRINOX",
-        "RAMCOCEM",
-        "RBLBANK",
-        "RECLTD",
-        "RELIANCE",
-        "SAIL",
-        "SBICARD",
-        "SBILIFE",
-        "SBIN",
-        "SHREECEM",
-        "SHRIRAMFIN",
-        "SIEMENS",
-        "SRF",
-        "SUNPHARMA",
-        "SUNTV",
-        "SYNGENE",
-        "TATACHEM",
-        "TATACOMM",
-        "TATACONSUM",
-        "TATAMOTORS",
-        "TATAPOWER",
-        "TATASTEEL",
-        "TCS",
-        "TECHM",
-        "TITAN",
-        "TORNTPHARM",
-        "TRENT",
-        "TVSMOTOR",
-        "UBL",
-        "ULTRACEMCO",
-        "UNITDSPR",
-        "UPL",
-        "VEDL",
-        "VOLTAS",
-        "WIPRO",
-        "ZYDUSLIFE",
-    ],
-    key=len,
-    reverse=True,
-)
-
 
 def get_id(x, tbl_stock):
     name = x.split()[0]
     filtered_df = tbl_stock[tbl_stock["name"] == name]
     return filtered_df.iloc[0]["id"]
+
+def write_to_sql_with_progress(df, table_name, engine, schema="options", chunksize=5000):
+    total_chunks = (len(df) // chunksize) + 1  # Calculate number of chunks
+    
+    with engine.begin() as conn:  # Ensures transaction safety
+        for i, chunk in enumerate(tqdm(range(0, len(df), chunksize), total=total_chunks, desc="Writing to SQL")):
+            df.iloc[chunk : chunk + chunksize].to_sql(
+                table_name,
+                schema=schema,
+                if_exists="append",
+                con=conn,
+                index=True,
+                method="multi"  # Optimizes batch inserts
+            )
 
 async def main():
     # Create a PostgreSQL engine
@@ -405,11 +231,11 @@ async def main():
     ]
     ticker_df = pd.DataFrame([])
 
-    dates = generate_dates(2025, 2, 14, nse_holidays_2025, "2025-02-14")
-
     # year = 2024
     # month = 7
     # end_date = 2024-07-02
+    dates = generate_dates(2025, 2, 10, nse_holidays_2025, "2025-02-14")
+
 
     instrument_df = pd.DataFrame(instrument_data)
     # instrument_df["stock_id"] = instrument_df["trading_symbol"].apply(
@@ -438,38 +264,21 @@ async def main():
             ticker_df = pd.concat([ticker_df, candle_stick_df], ignore_index=True)
 
     print("Processing complete.")
-    existing_ids = pd.read_sql("SELECT id FROM options.instrument", engine)['id'].apply(lambda x: str(x)).tolist()
+    existing_ids = pd.read_sql("SELECT id FROM options.instrument", engine)['id']
     instrument_df_filtered = instrument_df[~instrument_df['id'].isin(existing_ids)]
-    instrument_df.set_index("id", inplace=True)
+    instrument_df_filtered.set_index("id", inplace=True)
 
-    # Insert only new data
-    instrument_df_filtered.to_sql(
-        "instrument", schema="options", if_exists="append", con=engine, index=False
-    )
-
-    # try:
-    #     instrument_df.to_sql(
-    #         "instrument", schema="options", if_exists="append", con=engine, index=True
-    #     )
-    # except IntegrityError as e:
-    #     # Check if the error is specifically a duplicate key violation
-    #     if "duplicate key value violates unique constraint \"instrument_pkey\"" in str(e.orig):
-    #         print("Duplicate entry detected, continuing...")
-    #     else:
-    #         # Raise the error if it's not the one we're looking for
-    #         raise e
+    if not instrument_df_filtered.empty:
+        # Insert only new data
+        instrument_df_filtered.to_sql(
+            "instrument", schema="options", if_exists="append", con=engine, index=True
+        )
 
     print("Instrument Pushed to DB.")
     ticker_df.set_index("id", inplace=True)
-    ticker_df.to_sql(
-        "ticker",
-        schema="options",
-        if_exists="append",
-        con=engine,
-        index=True,
-        chunksize=5000,
-    )
+    write_to_sql_with_progress(ticker_df, "ticker", engine)
     print("Ticker Pushed to DB.")
+
 
 
 if __name__ == "__main__":
