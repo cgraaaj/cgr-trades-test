@@ -1,5 +1,8 @@
 import asyncio
 import json
+import requests
+import logging
+import gzip
 import re
 import uuid
 import time
@@ -26,6 +29,7 @@ from tenacity import (
 # Global constants
 NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
 semaphore = asyncio.Semaphore(10)  # Control concurrency
+logging.basicConfig(filename='sync_log.log', level=logging.INFO, format='%(asctime)s - %(message)s')
 DB_CONNECTION_STRING = (
     "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
     % quote("sdadmin@postgres")
@@ -173,10 +177,38 @@ def write_to_sql_postgres(df, table_name, engine, schema="options"):
         with conn.connection.cursor() as cur:
             cur.copy_expert(sql, output)  # High-speed bulk insert
 
+def sync_instrument_to_ticker(engine):
+    logging.info("Starting instrument_to_ticker sync...")
+
+    query = text("""
+        INSERT INTO options.instrument_to_ticker (instrument_id, ticker_id, stock_id, instrument_type, strike_price, expiry, trade_date)
+        SELECT 
+            i.id AS instrument_id,
+            t.id AS ticker_id,
+            i.stock_id,
+            i.instrument_type,
+            i.strike_price,
+            i.expiry,
+            DATE(t.time_stamp) AS trade_date
+        FROM options.ticker t
+        JOIN options.instrument i ON t.instrument_id = i.id
+        LEFT JOIN options.instrument_to_ticker it ON t.id = it.ticker_id
+        WHERE it.ticker_id IS NULL
+    """)
+
+    with engine.connect() as connection:
+        result = connection.execute(query)
+        logging.info(f"Inserted {result.rowcount} missing records.")
+
+    logging.info("Sync completed successfully!")
+
 
 async def main():
     """Main execution pipeline."""
     engine = create_engine(DB_CONNECTION_STRING)
+
+    stock_updater(engine)
+    instrument_dowanloader()
 
     # Load instrument & stock data
     with engine.connect() as conn:
@@ -217,7 +249,7 @@ async def main():
         "2025-11-05",
         "2025-12-25",
     ]
-    dates = generate_dates(2025, 2, 21, nse_holidays_2025, "2025-02-21")
+    dates = generate_dates(2025, 3, 5, nse_holidays_2025, "2025-03-05")
 
     instrument_df = pd.DataFrame(instrument_data)
     instrument_df["stock_id"] = instrument_df["trading_symbol"].apply(
@@ -251,6 +283,89 @@ async def main():
     ticker_df.set_index("id", inplace=True)
     write_to_sql_with_progress(ticker_df, "ticker", engine)
     print("Ticker data pushed to DB.")
+
+    time.sleep(10)
+
+    sync_instrument_to_ticker(engine)
+
+def instrument_dowanloader():
+    # URL of the .gz file
+    url = 'https://assets.upstox.com/market-quote/instruments/exchange/NSE.json.gz'
+
+    # Download the .gz file
+    response = requests.get(url)
+    response.raise_for_status()  # Check if the request was successful
+
+    # Decompress the .gz file
+    with gzip.open(io.BytesIO(response.content), 'rt', encoding='utf-8') as gz_file:
+        # Load JSON data
+        data = json.load(gz_file)
+
+    # Save the JSON data to a file
+    with open('/home/cgraaaj/Projects/cgr-trades/python/NSE.json', 'w', encoding='utf-8') as json_file:
+        json.dump(data, json_file, indent=4)
+
+    print('File has been downloaded and saved as NSE.json')
+
+def stock_updater(engine):
+    # Base URL for NSE
+    base_url = 'https://www.nseindia.com'
+    
+    # Create a session to maintain cookies
+    session = requests.Session()
+    
+    # Comprehensive headers to mimic a browser
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive',
+        'Referer': 'https://www.nseindia.com/',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+    }
+    
+    try:
+        # First, access the home page to get initial cookies
+        home_response = session.get(base_url, headers=headers)
+        
+        # Wait a moment to simulate browser behavior
+        time.sleep(2)
+        
+        # URL for stock symbols
+        url = "https://www.nseindia.com/api/master-quote"
+        
+        # Make the request using the session
+        response = session.get(url, headers=headers)
+        
+        # Check if the request was successful
+        response.raise_for_status()
+        
+        # Parse the JSON response
+        stock_symbols = json.loads(response.text)
+        
+        stock_symbols = sorted(stock_symbols, key=len, reverse=True)
+
+        df = pd.DataFrame(
+        {'name':stock_symbols, 'nifty_fifty_index':0}
+            )
+        df['id'] = [uuid.uuid5(NAMESPACE_STOCK,s) for s in stock_symbols]
+
+        existing = pd.read_sql_query("SELECT * FROM options.stock", con=engine)
+        newStocks = df[~df["id"].isin(existing["id"])]
+        if not newStocks.empty:
+            newStocks.to_sql("stock", schema="options", if_exists="append", con=engine, index=False)
+            
+            print('new stocks pushed to db',newStocks['name'].tolist())
+
+    except requests.RequestException as e:
+        print(f"Error fetching data: {e}")
+        print("Response content:", e.response.text if hasattr(e, 'response') else "No response content")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"JSON Decode Error: {e}")
+        return None
 
 
 if __name__ == "__main__":
