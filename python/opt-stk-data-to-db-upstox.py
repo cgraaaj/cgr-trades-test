@@ -96,9 +96,10 @@ async def get_valid_instrument_tickdata(
         return None
 
 
-def generate_dates(year, month, start_day, holidays, end_date):
+def generate_dates(start_date, holidays, end_date):
     """Generate valid trading dates, excluding weekends and holidays."""
-    start_date = datetime(year, month, start_day)
+    # start_date = datetime(year, month, start_day)
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
     all_dates = pd.date_range(start=start_date, end=end_date)
 
@@ -255,7 +256,7 @@ async def main():
         "2025-11-05",
         "2025-12-25",
     ]
-    dates = generate_dates(2025, 4, 2, nse_holidays_2025, "2025-04-02")
+    dates = generate_dates("2025-04-02", nse_holidays_2025, "2025-04-02")
 
     instrument_df = pd.DataFrame(instrument_data)
     instrument_df["stock_id"] = instrument_df["trading_symbol"].apply(
@@ -354,7 +355,6 @@ def stock_updater(engine):
 
         # Parse the JSON response
         stock_symbols = json.loads(response.text)
-
         stock_symbols = sorted(stock_symbols, key=len, reverse=True)
 
         df = pd.DataFrame(
@@ -362,32 +362,52 @@ def stock_updater(engine):
         )
         df["id"] = [uuid.uuid5(NAMESPACE_STOCK, s) for s in stock_symbols]
 
-        existing = pd.read_sql_query("SELECT * FROM options.stock", con=engine)
-        newStocks = df[~df["id"].isin(existing["id"])]
-        oldStocks = existing[~existing["id"].isin(df["id"])]
-        if not newStocks.empty:
-            newStocks.to_sql(
-                "stock", schema="options", if_exists="append", con=engine, index=False
-            )
-            print("new stocks pushed to db", newStocks["name"].tolist())
-        else:
-            print("No new stocks added")
-        if not oldStocks.empty:
-            with engine.connect() as conn:
-                update_query = text(
-                    """
-                    UPDATE options.stock 
-                    SET is_active = False, updated_on = now()
-                    WHERE id = :stock_id
-                """
-                )
-                for stock_id in oldStocks["id"]:
-                    conn.execute(update_query, {"stock_id": stock_id})
-                conn.commit()
+        # Fetch all existing stocks from the DB
+        allStocks = pd.read_sql_query(
+            "SELECT id, name, is_active FROM options.stock", con=engine
+        )
 
-            print("Old stocks marked as inactive:", oldStocks["name"].tolist())
-        else:
-            print("No old stocks to deactivate.")
+        # Identify stocks
+        newStocks = df[~df["id"].isin(allStocks["id"])]
+        oldStocks = allStocks[~allStocks["id"].isin(df["id"]) & allStocks["is_active"]]
+        existingStocks = allStocks[
+            allStocks["id"].isin(df["id"]) & ~allStocks["is_active"]
+        ]
+
+        # Execute updates in a single transaction
+        with engine.connect() as conn:
+            # Reactivate inactive stocks that reappear
+            if not existingStocks.empty:
+                conn.execute(
+                    text(
+                        "UPDATE options.stock SET is_active = True, updated_on = now() WHERE id IN :stock_ids"
+                    ),
+                    {"stock_ids": tuple(existingStocks["id"])},
+                )
+                print("Reactivated stocks:", existingStocks["name"].tolist())
+
+            # Insert new stocks
+            if not newStocks.empty:
+                newStocks.to_sql(
+                    "stock",
+                    schema="options",
+                    if_exists="append",
+                    con=engine,
+                    index=False,
+                )
+                print("New stocks added:", newStocks["name"].tolist())
+
+            # Deactivate stocks that are no longer present
+            if not oldStocks.empty:
+                conn.execute(
+                    text(
+                        "UPDATE options.stock SET is_active = False, updated_on = now() WHERE id IN :stock_ids"
+                    ),
+                    {"stock_ids": tuple(oldStocks["id"])},
+                )
+                print("Deactivated stocks:", oldStocks["name"].tolist())
+
+            conn.commit()
 
     except requests.RequestException as e:
         print(f"Error fetching data: {e}")
