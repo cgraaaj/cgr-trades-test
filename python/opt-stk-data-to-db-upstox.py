@@ -1,7 +1,7 @@
 import asyncio
+import sys
 import json
 import requests
-import logging
 import gzip
 import re
 import uuid
@@ -28,10 +28,7 @@ from tenacity import (
 
 # Global constants
 NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
-semaphore = asyncio.Semaphore(1)  # Control concurrency
-logging.basicConfig(
-    filename="sync_log.log", level=logging.INFO, format="%(asctime)s - %(message)s"
-)
+semaphore = asyncio.Semaphore(10)  # Control concurrency
 DB_CONNECTION_STRING = (
     "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
     % quote("sdadmin@postgres")
@@ -182,7 +179,7 @@ def write_to_sql_postgres(df, table_name, engine, schema="options"):
 
 
 def sync_instrument_to_ticker(engine):
-    logging.info("Starting instrument_to_ticker sync...")
+    print("Starting instrument_to_ticker sync...")
 
     query = text(
         """
@@ -205,12 +202,13 @@ def sync_instrument_to_ticker(engine):
     with engine.connect() as connection:
         result = connection.execute(query)
         connection.commit()
-        logging.info(f"Inserted {result.rowcount} missing records.")
+        print(f"Inserted {result.rowcount} missing records.")
 
-    logging.info("Sync completed successfully!")
+    print("Sync completed successfully!")
 
 
-async def main():
+async def main(date_str):
+    print(f"Running program for date: {date_str}")
     """Main execution pipeline."""
     engine = create_engine(DB_CONNECTION_STRING)
 
@@ -256,7 +254,8 @@ async def main():
         "2025-11-05",
         "2025-12-25",
     ]
-    dates = generate_dates("2025-04-02", nse_holidays_2025, "2025-04-02")
+    # generate dates with startdate, holidays, enddate
+    dates = generate_dates(date_str, nse_holidays_2025, date_str)
 
     instrument_df = pd.DataFrame(instrument_data)
     instrument_df["stock_id"] = instrument_df["trading_symbol"].apply(
@@ -423,5 +422,8 @@ def stock_updater(engine):
 
 if __name__ == "__main__":
     start_time = time.time()
-    asyncio.run(main())
+    date_arg = (
+        sys.argv[1] if len(sys.argv) > 1 else datetime.today().strftime("%Y-%m-%d")
+    )
+    asyncio.run(main(date_arg))
     print(f"Execution time: {(time.time() - start_time) / 60:.2f} minutes")
