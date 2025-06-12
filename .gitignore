@@ -7,3 +7,4 @@ smart-api-venv/
 sa/
 *.json
 *.csv
+.env
