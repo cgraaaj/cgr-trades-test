@@ -28,7 +28,7 @@ from tenacity import (
 
 # Global constants
 NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
-semaphore = asyncio.Semaphore(10)  # Control concurrency
+semaphore = asyncio.Semaphore(1)  # Control concurrency
 DB_CONNECTION_STRING = (
     "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
     % quote("sdadmin@postgres")
@@ -207,8 +207,12 @@ def sync_instrument_to_ticker(engine):
     print("Sync completed successfully!")
 
 
-async def main(date_str):
-    print(f"Running program for date: {date_str}")
+async def main(date_strs):
+    if len(date_strs) > 2:
+        print(f"Running program for date: {date_strs[1]} to {date_strs[2]}")
+    else:
+        print(f"Running program for date: {date_strs[1]}")
+
     """Main execution pipeline."""
     engine = create_engine(DB_CONNECTION_STRING)
 
@@ -255,7 +259,10 @@ async def main(date_str):
         "2025-12-25",
     ]
     # generate dates with startdate, holidays, enddate
-    dates = generate_dates(date_str, nse_holidays_2025, date_str)
+    if len(date_strs) > 2:
+        dates = generate_dates(date_strs[1], nse_holidays_2025, date_strs[2])
+    else:
+        dates = generate_dates(date_strs[1], nse_holidays_2025, date_strs[1])
 
     instrument_df = pd.DataFrame(instrument_data)
     instrument_df["stock_id"] = instrument_df["trading_symbol"].apply(
@@ -332,6 +339,13 @@ def stock_updater(engine):
         "Connection": "keep-alive",
         "Referer": "https://www.nseindia.com/",
         "X-Requested-With": "XMLHttpRequest",
+        "sec-ch-ua": "\"Chromium\";v=\"118\", \"Google Chrome\";v=\"118\", \"Not=A?Brand\";v=\"99\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
         "Cache-Control": "no-cache",
         "Pragma": "no-cache",
     }
@@ -342,6 +356,11 @@ def stock_updater(engine):
 
         # Wait a moment to simulate browser behavior
         time.sleep(2)
+
+        # Add cookies to request headers
+        cookies_dict = session.cookies.get_dict()
+        cookies_str = "; ".join([f"{k}={v}" for k, v in cookies_dict.items()])
+        headers["Cookie"] = cookies_str
 
         # URL for stock symbols
         url = "https://www.nseindia.com/api/master-quote"
@@ -422,8 +441,8 @@ def stock_updater(engine):
 
 if __name__ == "__main__":
     start_time = time.time()
-    date_arg = (
-        sys.argv[1] if len(sys.argv) > 1 else datetime.today().strftime("%Y-%m-%d")
+    date_args = (
+        sys.argv if len(sys.argv) > 1 else datetime.today().strftime("%Y-%m-%d")
     )
-    asyncio.run(main(date_arg))
+    asyncio.run(main(date_args))
     print(f"Execution time: {(time.time() - start_time) / 60:.2f} minutes")

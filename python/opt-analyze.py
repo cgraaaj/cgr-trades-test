@@ -12,17 +12,14 @@ import math
 import pickle
 from collections import defaultdict
 from decimal import Decimal
-import time
-from datetime import timedelta
 
-
-
-pd.set_option('future.no_silent_downcasting', True)
 
 DATABASE_URL = (
     "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
     % quote("sdadmin@postgres")
 )
+
+stock_svc_url = "http://192.168.1.72:1234"
 
 engine = create_engine(DATABASE_URL)
 database = Database(DATABASE_URL)
@@ -67,15 +64,14 @@ def oi_action(row, option_type):
 def normalize_df_with_timestamp(df, trade_date):
     start_time = pd.Timestamp(f"{trade_date} 09:15:00")
     end_time = pd.Timestamp(f"{trade_date} 15:29:00")
-    full_range = pd.date_range(start=start_time, end=end_time, freq="1min")
+    full_range = pd.date_range(start=start_time, end=end_time, freq="1T")
     full_range_df = pd.DataFrame(full_range, columns=["time_stamp"])
     merged_df = pd.merge(full_range_df, df, on="time_stamp", how="left")
-    merged_df["open_interest"] = merged_df["open_interest"].fillna(0).infer_objects(copy=False)
-    merged_df["open_interest_change"] = merged_df["open_interest_change"].fillna(0).infer_objects(copy=False)
-    merged_df["volume"] = merged_df["volume"].fillna(0).infer_objects(copy=False)
-    merged_df["ltp"] = merged_df["ltp"].fillna(0.0).infer_objects(copy=False)
-    merged_df["ltp_change"] = merged_df["ltp_change"].fillna(0.0).infer_objects(copy=False)
-
+    merged_df["open_interest"].fillna(0.0, inplace=True)
+    merged_df["open_interest_change"].fillna(0.0, inplace=True)
+    merged_df["volume"].fillna(0.0, inplace=True)
+    merged_df["ltp"].fillna(0.0, inplace=True)
+    merged_df["ltp_change"].fillna(0.0, inplace=True)
     # merged_df["oi_action"].fillna("", inplace=True)
     # merged_df["trend"].fillna("", inplace=True)
     col = merged_df.pop("time_stamp")
@@ -108,73 +104,69 @@ def analyze_trend(ticker_cepe_df):
     return ticker_cepe_df
 
 
-def get_ticker_cepe_df(ticker_df, instrument_row, s_row):
-    ticker_cepe_df = pd.DataFrame()
-    try :
-        trade_date = ticker_df.iloc[0]["time_stamp"].strftime("%Y-%m-%d")
-        columns_cepe = [
-            "time_stamp",
-            "open_interest",
-            "open_interest_change",
-            "volume",
-            "ltp",
-            "ltp_change",
-            # "oi_action",
-            # "trend",
-        ]
-        if pd.isnull(instrument_row.ce_id):
-            ticker_ce_df = normalize_df_with_timestamp(
-                pd.DataFrame(columns=columns_cepe), trade_date
-            )
-        else:
-            ticker_ce_df = ticker_df[ticker_df["instrument_id"] == instrument_row.ce_id].copy()
-            ticker_ce_df["ltp"] = ticker_ce_df["close"]
-            ticker_ce_df["ltp_change"] = ticker_ce_df["ltp"].diff()
-            ticker_ce_df["open_interest_change"] = ticker_ce_df["open_interest"].diff()
-            ticker_ce_df = normalize_df_with_timestamp(ticker_ce_df, trade_date)
-            # ticker_ce_df["oi_action"] = ticker_ce_df.apply(
-            #     lambda row: oi_action(row, "CE"), axis=1
-            # )
-            # ticker_ce_df["trend"] = np.where(
-            #     ticker_ce_df["oi_action"].isin(buillish),
-            #     "Bullish",
-            #     np.where(ticker_ce_df["oi_action"].isin(bearish), "Bearish", None),
-            # )
-            ticker_ce_df = pd.DataFrame(ticker_ce_df)[columns_cepe]
-        if pd.isnull(instrument_row.pe_id):
-            ticker_pe_df = normalize_df_with_timestamp(
-                pd.DataFrame(columns=columns_cepe), trade_date
-            )
-        else:
-            ticker_pe_df = ticker_df[ticker_df["instrument_id"] == instrument_row.pe_id].copy()
-            ticker_pe_df["ltp"] = ticker_pe_df["close"]
-            ticker_pe_df["ltp_change"] = ticker_pe_df["ltp"].diff()
-            ticker_pe_df["open_interest_change"] = ticker_pe_df["open_interest"].diff()
-            ticker_pe_df = normalize_df_with_timestamp(ticker_pe_df, trade_date)
-            # ticker_pe_df["oi_action"] = ticker_pe_df.apply(
-            #     lambda row: oi_action(row, "PE"), axis=1
-            # )
-            # ticker_pe_df["trend"] = np.where(
-            #     ticker_pe_df["oi_action"].isin(buillish),
-            #     "Bullish",
-            #     np.where(ticker_pe_df["oi_action"].isin(bearish), "Bearish", None),
-            # )
-            ticker_pe_df = pd.DataFrame(ticker_pe_df)[columns_cepe]
-        ticker_cepe_df = (
-            pd.merge(ticker_ce_df, ticker_pe_df, how="outer", on="time_stamp")
-            .fillna(0.0)
-            .round(2)
+def get_ticker_cepe_df(ticker_df, instrument_row):
+    trade_date = ticker_df.iloc[0]["time_stamp"].strftime("%Y-%m-%d")
+    columns_cepe = [
+        "time_stamp",
+        "open_interest",
+        "open_interest_change",
+        "volume",
+        "ltp",
+        "ltp_change",
+        # "oi_action",
+        # "trend",
+    ]
+    if pd.isnull(instrument_row.ce_id):
+        ticker_ce_df = normalize_df_with_timestamp(
+            pd.DataFrame(columns=columns_cepe), trade_date
         )
-        # change interval
-        ticker_cepe_df = convert_candlestick_interval(ticker_cepe_df, "15min")
-        ticker_cepe_df = analyze_trend(ticker_cepe_df)
-        ticker_cepe_df.insert(1, "strike_price", instrument_row.strike_price)
-    except Exception as e:
-        print(f"{e} --> {s_row}")
+    else:
+        ticker_ce_df = ticker_df[ticker_df["instrument_id"] == instrument_row.ce_id]
+        ticker_ce_df["ltp"] = ticker_ce_df["close"]
+        ticker_ce_df["ltp_change"] = ticker_ce_df["ltp"].diff()
+        ticker_ce_df["open_interest_change"] = ticker_ce_df["open_interest"].diff()
+        ticker_ce_df = normalize_df_with_timestamp(ticker_ce_df, trade_date)
+        # ticker_ce_df["oi_action"] = ticker_ce_df.apply(
+        #     lambda row: oi_action(row, "CE"), axis=1
+        # )
+        # ticker_ce_df["trend"] = np.where(
+        #     ticker_ce_df["oi_action"].isin(buillish),
+        #     "Bullish",
+        #     np.where(ticker_ce_df["oi_action"].isin(bearish), "Bearish", None),
+        # )
+        ticker_ce_df = pd.DataFrame(ticker_ce_df)[columns_cepe]
+    if pd.isnull(instrument_row.pe_id):
+        ticker_pe_df = normalize_df_with_timestamp(
+            pd.DataFrame(columns=columns_cepe), trade_date
+        )
+    else:
+        ticker_pe_df = ticker_df[ticker_df["instrument_id"] == instrument_row.pe_id]
+        ticker_pe_df["ltp"] = ticker_pe_df["close"]
+        ticker_pe_df["ltp_change"] = ticker_pe_df["ltp"].diff()
+        ticker_pe_df["open_interest_change"] = ticker_pe_df["open_interest"].diff()
+        ticker_pe_df = normalize_df_with_timestamp(ticker_pe_df, trade_date)
+        # ticker_pe_df["oi_action"] = ticker_pe_df.apply(
+        #     lambda row: oi_action(row, "PE"), axis=1
+        # )
+        # ticker_pe_df["trend"] = np.where(
+        #     ticker_pe_df["oi_action"].isin(buillish),
+        #     "Bullish",
+        #     np.where(ticker_pe_df["oi_action"].isin(bearish), "Bearish", None),
+        # )
+        ticker_pe_df = pd.DataFrame(ticker_pe_df)[columns_cepe]
+    ticker_cepe_df = (
+        pd.merge(ticker_ce_df, ticker_pe_df, how="outer", on="time_stamp")
+        .fillna(0.0)
+        .round(2)
+    )
+    # change interval
+    ticker_cepe_df = convert_candlestick_interval(ticker_cepe_df, "15T")
+    ticker_cepe_df = analyze_trend(ticker_cepe_df)
+    ticker_cepe_df.insert(1, "strike_price", instrument_row.strike_price)
     return ticker_cepe_df
 
 
-def convert_candlestick_interval(df, new_interval="5min"):
+def convert_candlestick_interval(df, new_interval="5T"):
     """
     Convert 1-minute candlestick data to a specified higher timeframe.
 
@@ -236,27 +228,24 @@ def convert_candlestick_interval(df, new_interval="5min"):
 
 
 def get_min_simulation(df, interval=5):
+    # Calculate the number of records per day and the total number of days
+    records_per_day = 375 // interval
+    total_records = len(df)
+    total = total_records // records_per_day
+
     # Create a list to hold the new DataFrames
     dfs = []
-    try:
-        # Calculate the number of records per day and the total number of days
-        records_per_day = 375 // interval
-        total_records = len(df)
-        total = total_records // records_per_day
 
-
-        # Split the DataFrame into daily DataFrames and populate the new DataFrames
-        for i in range(records_per_day):
-            new_df = pd.concat(
-                [
-                    df.iloc[j * records_per_day + i : j * records_per_day + i + 1]
-                    for j in range(total)
-                ],
-                ignore_index=True,
-            )
-            dfs.append(new_df)
-    except Exception as e:
-        print(e)
+    # Split the DataFrame into daily DataFrames and populate the new DataFrames
+    for i in range(records_per_day):
+        new_df = pd.concat(
+            [
+                df.iloc[j * records_per_day + i : j * records_per_day + i + 1]
+                for j in range(total)
+            ],
+            ignore_index=True,
+        )
+        dfs.append(new_df)
     return dfs
 
 
@@ -298,8 +287,6 @@ def trend_n_grade_analysis(df):
     else:
         temp["options"]["calls"]["grade"] = "D"
     # calculate trend none ratio for call
-
-    # helps to define the stocks which is on trend using all strkie prices - #liquidity check
     temp["options"]["calls"]["tn_ratio"] = math.ceil(
         (
             (temp["options"]["calls"]["bullish"] + temp["options"]["calls"]["bearish"])
@@ -358,21 +345,82 @@ def trend_n_grade_analysis(df):
     )
     return temp
 
+# async def process_option_ticker(call, put, trade_date):
+async def process_option_ticker():
+    instrument_id = 'eabca150-1dfe-550a-b612-49851cbb9502'
+    trade_date = '2024-07-26'
+    try:
+        params ={
+            "instrument_id":f"{instrument_id}",
+            "trade_date":f"{trade_date}"
+        }
+        response = requests.get(stock_svc_url+'/get_ticker_data', params=params)
+        response.raise_for_status()  # raise exception for HTTP errors (4xx, 5xx)
+
+        data = response.json() 
+        print(data)
+        df = pd.DataFrame(data["payload"]["candles"])
+        # Ensure time_stamp is datetime
+        df["time_stamp"] = pd.to_datetime(df["time_stamp"])
+
+        # LTP is just the 'close' price
+        df["ltp"] = df["close"]
+
+        # Compute changes
+        df["oi_change"] = df["open_interest"].diff().fillna(0)
+        df["ltp_change"] = df["ltp"].diff().fillna(0)
+
+        # Optional: Reorder columns for readability
+        df = df[["time_stamp", "open", "high", "low", "close", "volume", "open_interest", "oi_change", "ltp", "ltp_change"]]
+
+        print(df)
+        df.to_csv('test.csv')
+    except Exception as e:
+        print(e)
+
 
 # Query to select all from the 'stock' table
-async def option_analyze(s_row, trade_date="2024-07-26", expiry_date="2025-05-29"):
+async def option_analyze():
     # stock_id = "e451a2b6-8863-5cad-975a-674d7ff145bd"
     # stock_name = 'AARTIIND'
-    instrument_df = await query_to_dataframe(
-        f"SELECT id, stock_id, segment, name, exchange, expiry, expiry_epoch, instrument_type, asset_symbol, \
-        underlying_symbol, instrument_key, lot_size, freeze_quantity, exchange_token, minimum_lot, asset_key, \
-        underlying_key, tick_size, asset_type, underlying_type, trading_symbol, strike_price, weekly \
-        FROM options.instrument where stock_id = uuid('{s_row.id}') \
-        and expiry = '{expiry_date}' \
-        and instrument_type != 'FUT'\
-        order by strike_price"
-    )
-    ticker_df = await process_instrument(instrument_df, trade_date)
+    try:
+        params = {
+            "stock_id": "e451a2b6-8863-5cad-975a-674d7ff145bd"
+        }
+        response = requests.get(stock_svc_url+'/get_fo_data', params=params)
+        response.raise_for_status()  # raise exception for HTTP errors (4xx, 5xx)
+
+        data = response.json()  # or use .text if it's plain text or .content for binary
+#         {
+#   "stock_id": "e451a2b6-8863-5cad-975a-674d7ff145bd",
+#   "per_expiry": {
+#     "2024-08-29": {
+#       "per_trade_date": {
+#         "2024-07-26": {
+#           "570.0": {
+#             "strike": 570,
+#             "call": null,
+#             "put": "eabca150-1dfe-550a-b612-49851cbb9502"
+#           },
+        # create common template consisting of  oi c-in-oi ce-ltp c-ce-ltp strike oi c-in-oi pe-ltp c-pe-ltp
+        stock_id = data.get("stock_id")
+        per_expiry = data.get("per_expiry", {})
+
+        for expiry_date, expiry_data in per_expiry.items():
+            trade_dates = expiry_data.get("per_trade_date", {})
+            for trade_date, strikes in trade_dates.items():
+                for strike_price, strike_info in strikes.items():
+                    strike = strike_info.get("strike")
+                    call = strike_info.get("call")
+                    put = strike_info.get("put")
+
+                    print(f"Stock: {stock_id}, Expiry: {expiry_date}, Trade Date: {trade_date}, "
+                        f"Strike: {strike}, Call ID: {call}, Put ID: {put}")
+                    process_option_ticker(call,put,trade_date)
+        print(data)
+    except  Exception as err:
+        print("Error:", err)
+    
     # create table ce_id strike_price pe_id
     columns = ["ce_id", "strike_price", "pe_id"]
     instrument_df_ce = instrument_df[instrument_df["instrument_type"] == "CE"]
@@ -387,10 +435,9 @@ async def option_analyze(s_row, trade_date="2024-07-26", expiry_date="2025-05-29
     instrument_df_ce_pe.columns = columns
     candle_stick_df = []
     for row in instrument_df_ce_pe.itertuples():
-        candle_stick_df.append(get_ticker_cepe_df(ticker_df, row, s_row))
+        candle_stick_df.append(get_ticker_cepe_df(ticker_df, row))
     candle_stick_df = pd.concat(candle_stick_df, ignore_index=True)
     # change interval - simulate 5 min interval including every strike price
-
     simaltion_dfs = get_min_simulation(candle_stick_df, 15)
     simulated_data = []
     instrument_data = {}
@@ -414,122 +461,15 @@ async def process_instrument(instrument_df, trade_date):
     )
     return ticker_df
 
-
-# def ranking_stocks(stock_data):
-def group_by_attribute(items, key):
-    grouped_dict = defaultdict(list)
-
-    for item in items:
-        group_key = item[key]
-        grouped_dict[group_key].append(item)
-
-    return dict(grouped_dict)
-
-
-def check_consecutive_appearances(grouped_data, threshold=1, window=timedelta(minutes=15)):
-    # Group all timestamps by stock
-    stock_to_times = defaultdict(list)
-    
-    for timestamp, items in grouped_data.items():
-        for item in items:
-            stock_to_times[item["stock"]].append(timestamp)
-
-    result = {}
-
-    for stock, timestamps in stock_to_times.items():
-        timestamps.sort()
-        count = 1
-        for i in range(1, len(timestamps)):
-            if timestamps[i] - timestamps[i - 1] == window:
-                count += 1
-                if count >= threshold:
-                    result[stock] = (count, timestamps[i])
-            else:
-                count = 1  # reset count if not consecutive
-
-    return result
-
-
-def option_ranking(data):
-    # get tn_ratio > 60
-    # get data of every stock on fifteen mins mark
-    c_stocks = []
-    p_stocks = []
-    prediction = {}
-    tn_ratio = 60
-    for t in range(0, 25):
-        for x in range(0, len(data)):
-            if t < len(data[x]["opt_data"]):
-                if (data[x]["opt_data"][t]["options"]["calls"]["tn_ratio"] > tn_ratio) & (
-                    data[x]["opt_data"][t]["options"]["calls"]["bullish"]
-                    > data[x]["opt_data"][t]["options"]["calls"]["bearish"]
-                ):
-                    data[x]["opt_data"][t]["stock"] = data[x]["name"]
-                    c_stocks.append(data[x]["opt_data"][t])
-                if (data[x]["opt_data"][t]["options"]["puts"]["tn_ratio"] > tn_ratio) & (
-                    data[x]["opt_data"][t]["options"]["puts"]["bullish"]
-                    > data[x]["opt_data"][t]["options"]["puts"]["bearish"]
-                ):
-                    data[x]["opt_data"][t]["stock"] = data[x]["name"]
-                    p_stocks.append(data[x]["opt_data"][t])
-    call_prediction = check_consecutive_appearances(
-        group_by_attribute(c_stocks, "time_stamp")
-    )
-    put_prediction = check_consecutive_appearances(
-        group_by_attribute(p_stocks, "time_stamp")
-    )
-    prediction["call"] = {
-        (time_stamp, stock) for stock, (count, time_stamp) in call_prediction.items()
-    }
-    prediction["put"] = {
-        (time_stamp, stock) for stock, (count, time_stamp) in put_prediction.items()
-    }
-    return prediction
-
-
 async def main():
-    start_time = time.time()
     await database.connect()
-    stock_df = await query_to_dataframe("SELECT * FROM options.stock where is_active")
-    # stock_df = await query_to_dataframe("SELECT * FROM options.stock where name = 'RELIANCE'")
-
-    tasks = [
-        option_analyze(s_row, date)
-        for s_row in stock_df.itertuples()
-        for date in [
-            "2025-05-12",
-            # "2024-07-29",
-            # "2024-07-30",
-            # "2024-07-31",
-            # "2024-08-01",
-            # "2024-08-02",
-            # "2024-08-05",
-        ]
-    ]
-    res_stocks = await asyncio.gather(*tasks)
-    pprint.pprint(res_stocks)
-    with open('analyzed_stocks_data.pickle', 'wb') as handle:
-        pickle.dump(res_stocks, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    prediction = option_ranking(res_stocks)
-    pprint.pprint(prediction)
-    with open('prediction.pickle', 'wb') as handle:
-        pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # stock_df = await query_to_dataframe("SELECT * FROM options.stock")
+    # await option_analyze()
+    await process_option_ticker()
     await database.disconnect()
-    print(f"Execution time: {(time.time() - start_time) / 60:.2f} minutes")
 
 
 asyncio.run(main())
-# with open("prediction.pickle", "rb") as f:
-#     data = pickle.load(f)
-
-# # Print the whole data
-# pprint.pprint(data)
-
-
-# for each stock get stock options id
-# stock_df[]
-# for each stock options get the ticker df
-# calculate the trend
 
 df_ce_pe = pd.DataFrame()
 columns = [
@@ -546,28 +486,3 @@ columns = [
     "Put OI",
 ]
 
-
-# df_ce_pe = (
-#     pd.merge(df_ce, df_pe, how="outer", on="strikePrice").fillna(0.0).round(2)
-# )
-# df_ce_pe.columns = columns
-# # sends each row axis = 1
-# df_ce_pe["Call OI Action"] = df_ce_pe.apply(oi_action_ce, axis=1)
-# df_ce_pe["Put OI Action"] = df_ce_pe.apply(oi_action_pe, axis=1)
-# df_ce_pe["Call Trend"] = np.where(
-#     df_ce_pe["Call OI Action"].isin(buillish),
-#     "Bullish",
-#     np.where(df_ce_pe["Call OI Action"].isin(bearish), "Bearish", None),
-# )
-# df_ce_pe["Put Trend"] = np.where(
-#     df_ce_pe["Put OI Action"].isin(buillish),
-#     "Bullish",
-#     np.where(df_ce_pe["Put OI Action"].isin(bearish), "Bearish", None),
-# )
-# columns.insert(0, "Call Trend")
-# columns.insert(1, "Call OI Action")
-# columns.insert(len(df_ce_pe.columns) - 1, "Put OI Action")
-# columns.insert(len(df_ce_pe.columns), "Put Trend")
-# df_ce_pe = df_ce_pe[columns]
-# # print(df_ce_pe)
-# pprint.pp(df_ce_pe)
