@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import requests
 import pandas as pd
 import numpy as np
@@ -14,11 +17,8 @@ from collections import defaultdict
 from decimal import Decimal
 import time
 from datetime import timedelta
+import config
 
-try:
-    import config_local as config
-except ImportError:
-    import config
 
 pd.set_option('future.no_silent_downcasting', True)
 

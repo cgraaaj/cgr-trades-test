@@ -1,8 +1,7 @@
-try:
-    import config_local as config
-except ImportError:
-    import config
-
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+import config
 import psycopg2
 from urllib.parse import urlparse
 

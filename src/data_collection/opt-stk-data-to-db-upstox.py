@@ -25,11 +25,10 @@ from tenacity import (
     retry_if_exception_type,
     RetryError,
 )
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+import config
 
-try:
-    import config_local as config
-except ImportError:
-    import config
 
 # Global constants
 NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")

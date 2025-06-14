@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 import requests
 import pandas as pd
 import numpy as np
@@ -12,11 +15,7 @@ import math
 import pickle
 from collections import defaultdict
 from decimal import Decimal
-
-try:
-    import config_local as config
-except ImportError:
-    import config
+import config
 
 DATABASE_URL = config.DATABASE_URL
 stock_svc_url = config.STOCK_SVC_URL
