@@ -1,12 +1,12 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-import config
+import db_config
 import psycopg2
 from urllib.parse import urlparse
 
 # Parse the DATABASE_URL from config
-url = urlparse(config.DATABASE_URL)
+url = urlparse(db_config.DATABASE_URL)
 
 # Establishing the connection
 conn = psycopg2.connect(

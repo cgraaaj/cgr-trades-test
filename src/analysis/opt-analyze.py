@@ -15,10 +15,10 @@ import math
 import pickle
 from collections import defaultdict
 from decimal import Decimal
-import config
+import db_config
 
-DATABASE_URL = config.DATABASE_URL
-stock_svc_url = config.STOCK_SVC_URL
+DATABASE_URL = db_config.DATABASE_URL
+stock_svc_url = db_config.STOCK_SVC_URL
 
 engine = create_engine(DATABASE_URL)
 database = Database(DATABASE_URL)

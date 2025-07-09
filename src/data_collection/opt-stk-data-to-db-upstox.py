@@ -27,12 +27,11 @@ from tenacity import (
 )
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-import config
-
+import db_config as config
 
 # Global constants
 NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
-semaphore = asyncio.Semaphore(1)  # Control concurrency
+semaphore = asyncio.Semaphore(10)  # Control concurrency
 DB_CONNECTION_STRING = config.DB_CONNECTION_STRING
 
 
@@ -218,7 +217,7 @@ async def main(date_strs):
     engine = create_engine(DB_CONNECTION_STRING)
 
     stock_updater(engine)
-    instrument_dowanloader()
+    instrument_downloader()
 
     # Load instrument & stock data
     with engine.connect() as conn:
@@ -303,7 +302,7 @@ async def main(date_strs):
     sync_instrument_to_ticker(engine)
 
 
-def instrument_dowanloader():
+def instrument_downloader():
     # URL of the .gz file
     url = "https://assets.upstox.com/market-quote/instruments/exchange/NSE.json.gz"
 

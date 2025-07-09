@@ -17,12 +17,12 @@ from collections import defaultdict
 from decimal import Decimal
 import time
 from datetime import timedelta
-import config
+import db_config
 
 
 pd.set_option('future.no_silent_downcasting', True)
 
-DATABASE_URL = config.DATABASE_URL
+DATABASE_URL = db_config.DATABASE_URL
 engine = create_engine(DATABASE_URL)
 database = Database(DATABASE_URL)
 
