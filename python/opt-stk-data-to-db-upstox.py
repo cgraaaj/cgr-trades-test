@@ -28,7 +28,7 @@ from tenacity import (
 
 # Global constants
 NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
-semaphore = asyncio.Semaphore(10)  # Control concurrency
+semaphore = asyncio.Semaphore(1)  # Control concurrency
 DB_CONNECTION_STRING = (
     "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
     % quote("sdadmin@postgres")
@@ -207,8 +207,10 @@ def sync_instrument_to_ticker(engine):
     print("Sync completed successfully!")
 
 
-async def main(date_str):
-    print(f"Running program for date: {date_str}")
+async def main(date_args):
+    start_date = date_args[0]
+    end_date = date_args[1]
+    print(f"Running program for date: {start_date} to {end_date}")
     """Main execution pipeline."""
     engine = create_engine(DB_CONNECTION_STRING)
 
@@ -255,7 +257,7 @@ async def main(date_str):
         "2025-12-25",
     ]
     # generate dates with startdate, holidays, enddate
-    dates = generate_dates(date_str, nse_holidays_2025, date_str)
+    dates = generate_dates(start_date, nse_holidays_2025, end_date)
 
     instrument_df = pd.DataFrame(instrument_data)
     instrument_df["stock_id"] = instrument_df["trading_symbol"].apply(
@@ -422,8 +424,13 @@ def stock_updater(engine):
 
 if __name__ == "__main__":
     start_time = time.time()
-    date_arg = (
-        sys.argv[1] if len(sys.argv) > 1 else datetime.today().strftime("%Y-%m-%d")
-    )
-    asyncio.run(main(date_arg))
+    if len(sys.argv) > 2:
+        date_args = [sys.argv[1], sys.argv[2]]
+    elif len(sys.argv) > 1:
+        date_args = [sys.argv[1], sys.argv[1]]
+    else:
+        today = datetime.today().strftime("%Y-%m-%d")
+        date_args = [today, today]
+
+    asyncio.run(main(date_args))
     print(f"Execution time: {(time.time() - start_time) / 60:.2f} minutes")
