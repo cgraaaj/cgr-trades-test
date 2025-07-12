@@ -19,6 +19,14 @@ import time
 from datetime import timedelta
 import db_config
 
+# Configuration constants
+TRADING_MINUTES_PER_DAY = 375  # 9:15 AM to 3:30 PM
+DEFAULT_INTERVAL = 15  # minutes
+TN_RATIO_THRESHOLD = 60  # Trend-to-none ratio threshold
+DEFAULT_TRADE_DATE = "2024-07-26"
+DEFAULT_EXPIRY_DATE = "2025-05-29"
+MARKET_START_TIME = "09:15:00"
+MARKET_END_TIME = "15:30:00"
 
 pd.set_option('future.no_silent_downcasting', True)
 
@@ -26,7 +34,8 @@ DATABASE_URL = db_config.DATABASE_URL
 engine = create_engine(DATABASE_URL)
 database = Database(DATABASE_URL)
 
-buillish = ["Short Cover", "Long Buildup"]
+# Fix the typo - change buillish to bullish
+bullish = ["Short Cover", "Long Buildup"]
 bearish = ["Long Unwind", "Short Buildup"]
 
 
@@ -91,7 +100,7 @@ def analyze_trend(ticker_cepe_df):
         1,
         "trend_x",
         np.where(
-            ticker_cepe_df["oi_action_x"].isin(buillish),
+            ticker_cepe_df["oi_action_x"].isin(bullish),
             "Bullish",
             np.where(ticker_cepe_df["oi_action_x"].isin(bearish), "Bearish", None),
         ),
@@ -100,7 +109,7 @@ def analyze_trend(ticker_cepe_df):
         lambda row: oi_action(row, "pe"), axis=1
     )
     ticker_cepe_df["trend_y"] = np.where(
-        ticker_cepe_df["oi_action_y"].isin(buillish),
+        ticker_cepe_df["oi_action_y"].isin(bullish),
         "Bullish",
         np.where(ticker_cepe_df["oi_action_y"].isin(bearish), "Bearish", None),
     )
@@ -239,7 +248,7 @@ def get_min_simulation(df, interval=5):
     dfs = []
     try:
         # Calculate the number of records per day and the total number of days
-        records_per_day = 375 // interval
+        records_per_day = TRADING_MINUTES_PER_DAY // interval
         total_records = len(df)
         total = total_records // records_per_day
 
@@ -517,7 +526,9 @@ async def main():
     print(f"Execution time: {(time.time() - start_time) / 60:.2f} minutes")
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
+
 # with open("prediction.pickle", "rb") as f:
 #     data = pickle.load(f)
 

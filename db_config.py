@@ -27,4 +27,9 @@ ENCODED_PASSWORD = quote(DB_PASSWORD)
 DATABASE_URL = (
     f"postgresql+psycopg2://{DB_USER}:{ENCODED_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
+
+DB_CONNECTION_STRING1 = (
+    "postgresql+psycopg2://sd_admin:%s@192.168.1.72:5430/stock-dumps"
+    % quote("sdadmin@postgres")
+)
 DB_CONNECTION_STRING = DATABASE_URL
