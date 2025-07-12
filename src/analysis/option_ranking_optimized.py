@@ -322,9 +322,21 @@ def export_predictions_to_excel(predictions: Dict, filename: str) -> bool:
         for date_entry in predictions.get("call", []):
             date = date_entry.get("date", "")
             for stock_data in date_entry.get("stock_data", []):
+                # Format timestamp properly
+                time_stamp = stock_data.get("time_stamp", "")
+                formatted_time = ""
+                if time_stamp:
+                    try:
+                        if hasattr(time_stamp, 'strftime'):
+                            formatted_time = time_stamp.strftime("%H:%M:%S")
+                        else:
+                            formatted_time = str(time_stamp)
+                    except:
+                        formatted_time = str(time_stamp)
+                
                 calls_data.append({
                     "Date": date,
-                    "Time": stock_data.get("time_stamp", ""),
+                    "Time": formatted_time,
                     "Stock": stock_data.get("stock", ""),
                     "Grade": stock_data.get("grade", ""),
                     "TN_Ratio": stock_data.get("tn_ratio", 0),
@@ -336,9 +348,21 @@ def export_predictions_to_excel(predictions: Dict, filename: str) -> bool:
         for date_entry in predictions.get("put", []):
             date = date_entry.get("date", "")
             for stock_data in date_entry.get("stock_data", []):
+                # Format timestamp properly
+                time_stamp = stock_data.get("time_stamp", "")
+                formatted_time = ""
+                if time_stamp:
+                    try:
+                        if hasattr(time_stamp, 'strftime'):
+                            formatted_time = time_stamp.strftime("%H:%M:%S")
+                        else:
+                            formatted_time = str(time_stamp)
+                    except:
+                        formatted_time = str(time_stamp)
+                
                 puts_data.append({
                     "Date": date,
-                    "Time": stock_data.get("time_stamp", ""),
+                    "Time": formatted_time,
                     "Stock": stock_data.get("stock", ""),
                     "Grade": stock_data.get("grade", ""),
                     "TN_Ratio": stock_data.get("tn_ratio", 0),
