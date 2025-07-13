@@ -33,6 +33,111 @@ MARKET_END_TIME = "15:30:00"
 BATCH_SIZE = 50  # Process stocks in batches
 MAX_CONCURRENT_TASKS = 10  # Limit concurrent tasks
 
+async def get_available_trading_dates():
+    """
+    Get all available trading dates from the database.
+    Returns list of dates in YYYY-MM-DD format.
+    """
+    try:
+        query = """
+        SELECT DISTINCT DATE(time_stamp) as date
+        FROM options.ticker
+        ORDER BY date
+        """
+        
+        result_df = await query_to_dataframe_optimized(query)
+        
+        if result_df.empty:
+            logger.warning("No trading dates found in database")
+            return []
+        
+        # Convert dates to string format
+        trading_dates = [date.strftime("%Y-%m-%d") for date in result_df['date']]
+        
+        logger.info(f"Found {len(trading_dates)} trading dates in database")
+        logger.info(f"Date range: {trading_dates[0]} to {trading_dates[-1]}")
+        
+        return trading_dates
+        
+    except Exception as e:
+        logger.error(f"Error fetching trading dates from database: {e}")
+        return []
+
+async def get_available_expiry_dates():
+    """
+    Get all available expiry dates from the database.
+    Returns list of dates in YYYY-MM-DD format.
+    """
+    try:
+        query = """
+        SELECT DISTINCT expiry
+        FROM options.instrument
+        WHERE instrument_type != 'FUT'
+        ORDER BY expiry
+        """
+        
+        result_df = await query_to_dataframe_optimized(query)
+        
+        if result_df.empty:
+            logger.warning("No expiry dates found in database")
+            return []
+        
+        # Convert dates to string format
+        expiry_dates = [date.strftime("%Y-%m-%d") for date in result_df['expiry']]
+        
+        logger.info(f"Found {len(expiry_dates)} expiry dates in database")
+        logger.info(f"Expiry range: {expiry_dates[0]} to {expiry_dates[-1]}")
+        
+        return expiry_dates
+        
+    except Exception as e:
+        logger.error(f"Error fetching expiry dates from database: {e}")
+        return []
+
+def get_expiry_for_trade_date(trade_date: str, expiry_dates: list) -> str:
+    """
+    Get the appropriate expiry date for a given trade date.
+    
+    Args:
+        trade_date: Trade date in YYYY-MM-DD format
+        expiry_dates: List of available expiry dates
+    
+    Returns:
+        Appropriate expiry date in YYYY-MM-DD format
+    """
+    try:
+        from datetime import datetime
+        
+        trade_dt = datetime.strptime(trade_date, "%Y-%m-%d")
+        trade_year_month = trade_dt.strftime("%Y-%m")
+        
+        # First, try to find expiry in the same month
+        for expiry in expiry_dates:
+            expiry_dt = datetime.strptime(expiry, "%Y-%m-%d")
+            expiry_year_month = expiry_dt.strftime("%Y-%m")
+            
+            if expiry_year_month == trade_year_month and expiry_dt >= trade_dt:
+                return expiry
+        
+        # If no expiry found in same month, get the next available expiry
+        for expiry in expiry_dates:
+            expiry_dt = datetime.strptime(expiry, "%Y-%m-%d")
+            if expiry_dt >= trade_dt:
+                return expiry
+        
+        # If no future expiry found, use the last available expiry
+        if expiry_dates:
+            logger.warning(f"No suitable expiry found for trade date {trade_date}, using last available: {expiry_dates[-1]}")
+            return expiry_dates[-1]
+        
+        # Fallback to default
+        logger.error(f"No expiry dates available for trade date {trade_date}")
+        return DEFAULT_EXPIRY_DATE
+        
+    except Exception as e:
+        logger.error(f"Error getting expiry for trade date {trade_date}: {e}")
+        return DEFAULT_EXPIRY_DATE
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -646,50 +751,84 @@ async def main_optimized():
         
         logger.info(f"Found {len(stock_df)} stocks")
         
-        # Process stocks in batches
+        # Get all available trading dates from database
+        logger.info("Fetching available trading dates from database...")
+        trading_dates = await get_available_trading_dates()
+        
+        if not trading_dates:
+            logger.error("No trading dates found in database. Exiting.")
+            return
+        
+        # Get all available expiry dates from database
+        logger.info("Fetching available expiry dates from database...")
+        expiry_dates = await get_available_expiry_dates()
+        
+        if not expiry_dates:
+            logger.error("No expiry dates found in database. Exiting.")
+            return
+        
+        # Process stocks in batches for multiple dates
         all_results = []
         total_batches = (len(stock_df) - 1) // BATCH_SIZE + 1
+        total_dates = len(trading_dates)
         
-        for i in range(0, len(stock_df), BATCH_SIZE):  # Process all stocks
-            batch = stock_df.iloc[i:i+BATCH_SIZE]
-            current_batch = i // BATCH_SIZE + 1
+        logger.info(f"Processing {len(stock_df)} stocks across {total_dates} trading dates")
+        
+        for date_idx, trade_date in enumerate(trading_dates):
+            # Get appropriate expiry date for this trade date
+            expiry_date = get_expiry_for_trade_date(trade_date, expiry_dates)
             
-            logger.info(f"Processing batch {current_batch}/{total_batches} ({len(batch)} stocks)")
+            logger.info(f"Processing date {date_idx + 1}/{total_dates}: {trade_date} (expiry: {expiry_date})")
+            date_results = []
             
-            try:
-                batch_results = await process_stocks_batch(
-                    list(batch.itertuples()), 
-                    "2025-05-12", 
-                    DEFAULT_EXPIRY_DATE
-                )
+            for i in range(0, len(stock_df), BATCH_SIZE):  # Process all stocks
+                batch = stock_df.iloc[i:i+BATCH_SIZE]
+                current_batch = i // BATCH_SIZE + 1
                 
-                # Filter out None results and exceptions
-                valid_results = []
-                for result in batch_results:
-                    if result is None:
-                        logger.warning("Got None result from batch processing")
-                    elif isinstance(result, Exception):
-                        logger.error(f"Got exception from batch processing: {result}")
-                    else:
-                        valid_results.append(result)
+                logger.info(f"Date {trade_date} - Processing batch {current_batch}/{total_batches} ({len(batch)} stocks)")
                 
-                all_results.extend(valid_results)
-                logger.info(f"Batch {current_batch} processed: {len(valid_results)} valid results")
-                
-            except Exception as batch_error:
-                logger.error(f"Error processing batch {current_batch}: {batch_error}")
-                logger.error(f"Error type: {type(batch_error)}")
-                import traceback
-                logger.error(f"Traceback: {traceback.format_exc()}")
-                continue
+                try:
+                    batch_results = await process_stocks_batch(
+                        list(batch.itertuples()), 
+                        trade_date, 
+                        expiry_date
+                    )
+                    
+                    # Filter out None results and exceptions
+                    valid_results = []
+                    for result in batch_results:
+                        if result is None:
+                            logger.warning("Got None result from batch processing")
+                        elif isinstance(result, Exception):
+                            logger.error(f"Got exception from batch processing: {result}")
+                        else:
+                            valid_results.append(result)
+                    
+                    date_results.extend(valid_results)
+                    logger.info(f"Date {trade_date} - Batch {current_batch} processed: {len(valid_results)} valid results")
+                    
+                except Exception as batch_error:
+                    logger.error(f"Error processing batch {current_batch} for date {trade_date}: {batch_error}")
+                    logger.error(f"Error type: {type(batch_error)}")
+                    import traceback
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    continue
+            
+            logger.info(f"Date {trade_date} completed: {len(date_results)} total results")
+            all_results.extend(date_results)
         
         logger.info(f"Successfully processed {len(all_results)} stocks total")
         
         # Save results
         try:
-            with open('analyzed_stocks_data_optimized.pickle', 'wb') as handle:
+            # Generate filename based on date range
+            start_date = trading_dates[0].replace("-", "")
+            end_date = trading_dates[-1].replace("-", "")
+            filename = f'analyzed_stocks_data_optimized_{start_date}_to_{end_date}.pickle'
+            
+            with open(filename, 'wb') as handle:
                 pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            logger.info("Results saved to analyzed_stocks_data_optimized.pickle")
+            logger.info(f"Results saved to {filename}")
         except Exception as save_error:
             logger.error(f"Error saving results: {save_error}")
         
@@ -697,10 +836,29 @@ async def main_optimized():
         try:
             prediction = option_ranking_optimized(all_results)
             
-            with open('prediction_optimized.pickle', 'wb') as handle:
+            # Generate filename based on date range
+            start_date = trading_dates[0].replace("-", "")
+            end_date = trading_dates[-1].replace("-", "")
+            pred_filename = f'prediction_optimized_{start_date}_to_{end_date}.pickle'
+            
+            with open(pred_filename, 'wb') as handle:
                 pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
             
             logger.info(f"Predictions generated: {len(prediction['call'])} calls, {len(prediction['put'])} puts")
+            logger.info(f"Predictions saved to {pred_filename}")
+            
+            # Export to Excel
+            try:
+                from option_ranking_optimized import export_predictions_to_excel
+                excel_filename = f"option_predictions_optimized_{start_date}_to_{end_date}.xlsx"
+                if export_predictions_to_excel(prediction, excel_filename):
+                    logger.info(f"Excel export successful: {excel_filename}")
+                else:
+                    logger.warning(f"Excel export failed for {excel_filename}")
+            except ImportError as import_error:
+                logger.error(f"Could not import Excel export function: {import_error}")
+            except Exception as excel_error:
+                logger.error(f"Error exporting to Excel: {excel_error}")
             
         except Exception as prediction_error:
             logger.error(f"Error generating predictions: {prediction_error}")
