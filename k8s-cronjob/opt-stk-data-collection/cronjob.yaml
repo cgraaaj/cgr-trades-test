@@ -1,0 +1,121 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: opt-stk-data-collection-job
+  labels:
+    app: opt-stk-data-collection
+    component: data-ingestion
+spec:
+  # Run Tuesday through Saturday at 7:30 AM (to capture Monday-Friday data)
+  # Kubernetes CronJob uses UTC time
+  schedule: "30 2 * * 2-6"  # 7:30 AM IST = 2:00 AM UTC (IST is UTC+5:30)
+  timezone: "Asia/Kolkata"  # Set timezone explicitly
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid  # Prevent overlapping jobs
+  jobTemplate:
+    spec:
+      # Allow sufficient time for data collection and retries
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600  # 1 hour timeout
+      template:
+        metadata:
+          labels:
+            app: opt-stk-data-collection
+            component: data-ingestion
+        spec:
+          containers:
+          - name: opt-stk-collector
+            image: registry.cgraaaj.in/stock-x/opt-stk-data-collection:latest
+            args: ["$(TRADE_DATE)"]  # Pass yesterday's date as argument
+            env:
+              # Database configuration
+              - name: DB_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: opt-stk-db-secret
+                    key: db-user
+              - name: DB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: opt-stk-db-secret
+                    key: db-password
+              - name: DB_HOST
+                valueFrom:
+                  configMapKeyRef:
+                    name: opt-stk-config
+                    key: db-host
+              - name: DB_PORT
+                valueFrom:
+                  configMapKeyRef:
+                    name: opt-stk-config
+                    key: db-port
+              - name: DB_NAME
+                valueFrom:
+                  configMapKeyRef:
+                    name: opt-stk-config
+                    key: db-name
+              # API configuration
+              - name: STOCK_SVC_URL
+                valueFrom:
+                  configMapKeyRef:
+                    name: opt-stk-config
+                    key: stock-svc-url
+              # Discord webhook for notifications
+              - name: DISCORD_WEBHOOK_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: opt-stk-db-secret
+                    key: discord-webhook-url
+              # Calculate yesterday's date for data collection
+              - name: TRADE_DATE
+                value: "$(shell date -d 'yesterday' +%Y-%m-%d)"
+            resources:
+              requests:
+                memory: "2Gi"
+                cpu: "1000m"
+              limits:
+                memory: "4Gi"
+                cpu: "2000m"
+            # Health check
+            livenessProbe:
+              exec:
+                command:
+                - python
+                - -c
+                - "import sys; sys.exit(0)"
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              timeoutSeconds: 10
+              failureThreshold: 3
+            # Security context
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              runAsGroup: 1000
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                - ALL
+            # Volume mounts for logs (optional, for persistent logging)
+            volumeMounts:
+            - name: logs-volume
+              mountPath: /app/logs
+          # Restart policy
+          restartPolicy: OnFailure
+          # Security context for pod
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+          # Volumes
+          volumes:
+          - name: logs-volume
+            emptyDir: {}
+          # Node selector for scheduling (optional)
+          nodeSelector:
+            kubernetes.io/os: linux
+          # Tolerations (optional)
+          tolerations: [] 

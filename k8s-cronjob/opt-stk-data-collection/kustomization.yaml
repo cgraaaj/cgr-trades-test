@@ -1,0 +1,62 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Namespace for the deployment
+namespace: default
+
+# Common labels applied to all resources
+commonLabels:
+  app: opt-stk-data-collection
+  version: v1.0.0
+  environment: production
+
+# Resources to include
+resources:
+  - configmap.yaml
+  - secret.yaml
+  - cronjob.yaml
+
+# Images to customize (for different environments)
+images:
+  - name: registry.cgraaaj.in/stock-x/opt-stk-data-collection
+    newTag: latest
+
+# ConfigMap generator (alternative to static configmap.yaml)
+# configMapGenerator:
+#   - name: opt-stk-config
+#     literals:
+#       - db-host=192.168.1.72
+#       - db-port=5430
+#       - db-name=stock-dumps
+
+# Secret generator (alternative to static secret.yaml)
+# secretGenerator:
+#   - name: opt-stk-db-secret
+#     literals:
+#       - db-user=sd_admin
+#       - db-password=sdadmin@postgres
+
+# Patches for customization
+# patchesStrategicMerge:
+#   - cronjob-patch.yaml
+
+# JSON patches for fine-grained control
+# patchesJson6902:
+#   - target:
+#       group: batch
+#       version: v1
+#       kind: CronJob
+#       name: opt-stk-data-collection-job
+#     path: patches/schedule-patch.yaml
+
+# Replacements for template variables
+# replacements:
+#   - source:
+#       kind: ConfigMap
+#       name: opt-stk-config
+#       fieldPath: data.db-host
+#     targets:
+#       - select:
+#           kind: CronJob
+#         fieldPaths:
+#           - spec.jobTemplate.spec.template.spec.containers.[name=opt-stk-collector].env.[name=DB_HOST].value 

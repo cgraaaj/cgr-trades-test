@@ -1,0 +1,123 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: opt-stk-data-collection
+  namespace: argocd
+  labels:
+    app: opt-stk-data-collection
+    environment: production
+  annotations:
+    # Enable automated sync
+    argocd.argoproj.io/sync-options: "Prune=false"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # Project to deploy to
+  project: default
+  
+  # Source repository configuration
+  source:
+    # Your Git repository URL
+    repoURL: https://github.com/your-username/cgr-trades.git  # Update this
+    targetRevision: HEAD
+    path: k8s-cronjob/opt-stk-data-collection
+    
+    # Kustomize configuration
+    kustomize:
+      images:
+        - registry.cgraaaj.in/stock-x/opt-stk-data-collection:latest
+  
+  # Destination cluster and namespace
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default  # Change to your desired namespace
+  
+  # Sync policy configuration
+  syncPolicy:
+    # Enable automatic sync
+    automated:
+      prune: true      # Remove resources not in Git
+      selfHeal: true   # Sync when cluster state differs from Git
+      allowEmpty: false
+    
+    # Sync options
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false  # Set to true if namespace should be created
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    
+    # Retry configuration
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  
+  # Revision history limit
+  revisionHistoryLimit: 3
+  
+  # Ignorance rules for drift detection
+  ignoreDifferences:
+    - group: batch
+      kind: CronJob
+      jsonPointers:
+        - /spec/jobTemplate/spec/template/spec/containers/0/env
+        - /spec/schedule
+---
+# Project configuration (optional, if using custom project)
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: opt-stk-project
+  namespace: argocd
+spec:
+  description: "Opt-STK Data Collection Project"
+  
+  # Source repositories
+  sourceRepos:
+    - 'https://github.com/your-username/cgr-trades.git'  # Update this
+  
+  # Destination clusters and namespaces
+  destinations:
+    - namespace: default
+      server: https://kubernetes.default.svc
+    - namespace: opt-stk
+      server: https://kubernetes.default.svc
+  
+  # Cluster resource allow list
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  
+  # Namespace resource allow list
+  namespaceResourceWhitelist:
+    - group: ''
+      kind: Secret
+    - group: ''
+      kind: ConfigMap
+    - group: 'batch'
+      kind: CronJob
+    - group: 'batch'
+      kind: Job
+    - group: 'apps'
+      kind: Deployment
+  
+  # Roles for project members
+  roles:
+    - name: admin
+      description: "Admin role for opt-stk project"
+      policies:
+        - p, proj:opt-stk-project:admin, applications, *, opt-stk-project/*, allow
+        - p, proj:opt-stk-project:admin, repositories, *, *, allow
+      groups:
+        - opt-stk-admins
+    
+    - name: developer
+      description: "Developer role for opt-stk project"
+      policies:
+        - p, proj:opt-stk-project:developer, applications, get, opt-stk-project/*, allow
+        - p, proj:opt-stk-project:developer, applications, sync, opt-stk-project/*, allow
+      groups:
+        - opt-stk-developers 

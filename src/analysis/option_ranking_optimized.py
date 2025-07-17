@@ -17,7 +17,7 @@ class Config:
     TRADING_START_TIME = "09:30:00"
     TRADING_END_TIME = "14:00:00"
     MAX_TIME_INTERVALS = 25
-    ACCEPTED_GRADES = ["A","B"]  # Only accept A grades
+    ACCEPTED_GRADES = ["A","B","C","D"]  # Only accept A grades
     CONSECUTIVE_WINDOW_MINUTES = 15
 
 class Grade(Enum):
@@ -402,7 +402,7 @@ def main():
     """Main function to run the optimized option ranking"""
     try:
         # Load data
-        data = load_analyzed_data("analyzed_stocks_data_optimized.pickle")
+        data = load_analyzed_data("analyzed_stocks_data_optimized_20240726_to_20250711.pickle")
         if not data:
             logger.error("No data loaded, exiting")
             return

@@ -1,0 +1,279 @@
+name: Opt-STK Data Collection CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - 'src/data_collection/**'
+      - 'k8s-cronjob/opt-stk-data-collection/**'
+      - 'requirements/**'
+      - 'db_config.py'
+      - '.github/workflows/deploy.yaml'
+  pull_request:
+    branches:
+      - master
+      - main
+    paths:
+      - 'src/data_collection/**'
+      - 'k8s-cronjob/opt-stk-data-collection/**'
+      - 'requirements/**'
+      - 'db_config.py'
+  release:
+    types: [published]
+
+env:
+  IMAGE_REGISTRY: "registry.cgraaaj.in/stock-x"
+  IMAGE_NAME: "opt-stk-data-collection"
+  BUILDKIT_NO_CLIENT_TOKEN: 1
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # Job 1: Code Quality and Testing
+  test-and-lint:
+    name: Test and Code Quality
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache Python Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/requirements.txt
+          pip install pytest flake8 black isort safety bandit
+
+      - name: Code Formatting Check (Black)
+        run: black --check --diff src/
+
+      - name: Import Sorting Check (isort)
+        run: isort --check-only --diff src/
+
+      - name: Linting (Flake8)
+        run: flake8 src/ --max-line-length=88 --extend-ignore=E203,W503
+
+      - name: Security Check (Bandit)
+        run: bandit -r src/ -f json -o bandit-report.json || true
+
+      - name: Dependency Vulnerability Check (Safety)
+        run: safety check --json --output safety-report.json || true
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+
+  # Job 2: Build and Push Docker Image
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test-and-lint
+    if: github.event_name == 'push' || github.event_name == 'release'
+
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generate Image Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Login to Harbor Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Build and Push Multi-Arch Image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: k8s-cronjob/opt-stk-data-collection/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VCS_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom
+          path: sbom.spdx.json
+
+  # Job 3: Security Scanning
+  security-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.event_name == 'push' || github.event_name == 'release'
+
+    steps:
+      - name: Login to Harbor Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy Scan Results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Job 4: Update Manifests for ArgoCD
+  update-manifests:
+    name: Update Kubernetes Manifests
+    runs-on: ubuntu-latest
+    needs: [build-and-push, security-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Update Image Tag in Kustomization
+        run: |
+          cd k8s-cronjob/opt-stk-data-collection
+          # Extract the SHA-based tag from the built image
+          IMAGE_TAG=$(echo "${{ needs.build-and-push.outputs.image-tag }}" | grep "sha-" | head -1)
+          if [ -z "$IMAGE_TAG" ]; then
+            IMAGE_TAG="latest"
+          fi
+          echo "Updating image to: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG##*/}"
+          kustomize edit set image ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG##*/}
+
+      - name: Validate Kubernetes Manifests
+        run: |
+          cd k8s-cronjob/opt-stk-data-collection
+          kustomize build . > /tmp/manifests.yaml
+          echo "Generated manifests preview:"
+          head -50 /tmp/manifests.yaml
+
+      - name: Commit Updated Manifests
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add k8s-cronjob/opt-stk-data-collection/kustomization.yaml
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update opt-stk-data-collection image to ${{ github.sha }}"
+            git push
+            echo "Manifests updated for ArgoCD to pick up"
+          fi
+
+  # Job 5: Notification
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [build-and-push, security-scan, update-manifests]
+    if: always()
+
+    steps:
+      - name: Discord Notification - Success
+        if: ${{ needs.build-and-push.result == 'success' && needs.security-scan.result == 'success' && needs.update-manifests.result == 'success' }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "✅ Opt-STK Data Collection Build & Update Success",
+                "description": "Successfully built image and updated manifests for ArgoCD deployment",
+                "color": 3066993,
+                "fields": [
+                  {"name": "Repository", "value": "${{ github.repository }}", "inline": true},
+                  {"name": "Branch", "value": "${{ github.ref_name }}", "inline": true},
+                  {"name": "Commit", "value": "${{ github.sha }}", "inline": true},
+                  {"name": "Image", "value": "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:latest", "inline": false},
+                  {"name": "Next Step", "value": "ArgoCD will deploy the updated manifests", "inline": false}
+                ],
+                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Discord Notification - Failure
+        if: ${{ needs.build-and-push.result == 'failure' || needs.security-scan.result == 'failure' || needs.update-manifests.result == 'failure' }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "❌ Opt-STK Data Collection Pipeline Failed",
+                "description": "Build, security scan, or manifest update failed",
+                "color": 15158332,
+                "fields": [
+                  {"name": "Repository", "value": "${{ github.repository }}", "inline": true},
+                  {"name": "Branch", "value": "${{ github.ref_name }}", "inline": true},
+                  {"name": "Commit", "value": "${{ github.sha }}", "inline": true},
+                  {"name": "Build Status", "value": "${{ needs.build-and-push.result }}", "inline": true},
+                  {"name": "Security Scan", "value": "${{ needs.security-scan.result }}", "inline": true},
+                  {"name": "Manifest Update", "value": "${{ needs.update-manifests.result }}", "inline": true}
+                ],
+                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }} 

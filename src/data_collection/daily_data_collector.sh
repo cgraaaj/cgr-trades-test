@@ -146,7 +146,7 @@ cd "$PROJECT_DIR" || {
 }
 
 # Activate virtual environment
-VENV_PATH="$PROJECT_DIR/venv"
+VENV_PATH="$PROJECT_DIR/sa"
 if [ -d "$VENV_PATH" ]; then
     log_message "Activating virtual environment at: $VENV_PATH"
     source "$VENV_PATH/bin/activate" || {
