@@ -45,13 +45,13 @@ send_discord_notification() {
     # Build command based on action
     case "$action" in
         "success")
-            python "$DISCORD_NOTIFIER" success --trade-date "$trade_date" --execution-time "$execution_time" --log-file "$LOG_FILE" 2>&1 | tee -a "$LOG_FILE"
+            python3 "$DISCORD_NOTIFIER" success --trade-date "$trade_date" --execution-time "$execution_time" --log-file "$LOG_FILE" 2>&1 | tee -a "$LOG_FILE"
             ;;
         "failure")
-            python "$DISCORD_NOTIFIER" failure --trade-date "$trade_date" --error-message "$error_message" --log-file "$LOG_FILE" 2>&1 | tee -a "$LOG_FILE"
+            python3 "$DISCORD_NOTIFIER" failure --trade-date "$trade_date" --error-message "$error_message" --log-file "$LOG_FILE" 2>&1 | tee -a "$LOG_FILE"
             ;;
         "info")
-            python "$DISCORD_NOTIFIER" info --trade-date "$trade_date" --message "$error_message" --level "info" 2>&1 | tee -a "$LOG_FILE"
+            python3 "$DISCORD_NOTIFIER" info --trade-date "$trade_date" --message "$error_message" --level "info" 2>&1 | tee -a "$LOG_FILE"
             ;;
         *)
             log_error "Unknown Discord notification action: $action"
