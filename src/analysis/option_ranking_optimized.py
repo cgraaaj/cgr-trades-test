@@ -168,11 +168,12 @@ class OptionRankingOptimized:
         return dict(sorted(grouped.items()))
     
     def find_consecutive_appearances(self, grouped_predictions: Dict[datetime, List[StockPrediction]]) -> Dict[str, List[StockPrediction]]:
-        """Find stocks that appear in consecutive time intervals"""
+        """Find stocks that appear in consecutive time intervals (exactly 15 minutes apart)"""
         consecutive_by_date = defaultdict(list)
         
         timestamps = sorted(grouped_predictions.keys())
         prev_stocks = set()
+        prev_timestamp = None
         current_date = None
         
         for timestamp in timestamps:
@@ -180,19 +181,27 @@ class OptionRankingOptimized:
             if current_date != timestamp.date():
                 current_date = timestamp.date()
                 prev_stocks = set()
+                prev_timestamp = None
             
             current_stocks = {pred.stock for pred in grouped_predictions[timestamp]}
             
-            # Find stocks that appeared in previous interval
-            consecutive_stocks = current_stocks.intersection(prev_stocks)
-            
-            if consecutive_stocks:
-                for prediction in grouped_predictions[timestamp]:
-                    if prediction.stock in consecutive_stocks:
-                        date_key = timestamp.strftime("%Y-%m-%d")
-                        consecutive_by_date[date_key].append(prediction)
+            # Check if current timestamp is exactly 15 minutes after previous timestamp
+            if prev_timestamp is not None:
+                time_diff = timestamp - prev_timestamp
+                is_consecutive = time_diff == timedelta(minutes=15)
+                
+                if is_consecutive:
+                    # Find stocks that appeared in previous interval
+                    consecutive_stocks = current_stocks.intersection(prev_stocks)
+                    
+                    if consecutive_stocks:
+                        for prediction in grouped_predictions[timestamp]:
+                            if prediction.stock in consecutive_stocks:
+                                date_key = timestamp.strftime("%Y-%m-%d")
+                                consecutive_by_date[date_key].append(prediction)
             
             prev_stocks = current_stocks
+            prev_timestamp = timestamp
         
         return dict(consecutive_by_date)
     
@@ -402,7 +411,7 @@ def main():
     """Main function to run the optimized option ranking"""
     try:
         # Load data
-        data = load_analyzed_data("analyzed_stocks_data_optimized_20240726_to_20250711.pickle")
+        data = load_analyzed_data("analyzed_stocks_data_optimized_20240726_to_20240726.pickle")
         if not data:
             logger.error("No data loaded, exiting")
             return

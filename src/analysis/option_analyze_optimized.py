@@ -21,6 +21,7 @@ import db_config
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 import logging
+from option_ranking_optimized import OptionRankingOptimized, export_predictions_to_excel
 
 # Configuration constants
 TRADING_MINUTES_PER_DAY = 375  # 9:15 AM to 3:30 PM
@@ -475,7 +476,7 @@ def process_ce_pe_pair_optimized(ticker_df, pair, trade_date):
         else:
             ce_df = ticker_df[ticker_df['instrument_id'] == pair.ce_id].copy()
             if not ce_df.empty:
-                ce_df['ltp'] = ce_df['close']
+                ce_df['ltp'] = ce_df['open']
                 ce_df['ltp_change'] = ce_df['ltp'].diff()
                 ce_df['open_interest_change'] = ce_df['open_interest'].diff()
                 ce_df = ce_df[columns_cepe]
@@ -488,7 +489,7 @@ def process_ce_pe_pair_optimized(ticker_df, pair, trade_date):
         else:
             pe_df = ticker_df[ticker_df['instrument_id'] == pair.pe_id].copy()
             if not pe_df.empty:
-                pe_df['ltp'] = pe_df['close']
+                pe_df['ltp'] = pe_df['open']
                 pe_df['ltp_change'] = pe_df['ltp'].diff()
                 pe_df['open_interest_change'] = pe_df['open_interest'].diff()
                 pe_df = pe_df[columns_cepe]
@@ -643,76 +644,7 @@ def get_grade_from_percentage(percentage):
     else:
         return "D"
 
-# Optimized ranking function
-def option_ranking_optimized(data):
-    """Optimized ranking with better algorithms"""
-    if not data:
-        return {"call": set(), "put": set()}
-    
-    c_stocks = []
-    p_stocks = []
-    
-    # Use more efficient loops
-    for stock_data in data:
-        if not stock_data or "opt_data" not in stock_data:
-            continue
-        
-        stock_name = stock_data["name"]
-        opt_data = stock_data["opt_data"]
-        
-        for time_idx, time_data in enumerate(opt_data):
-            if not time_data or "options" not in time_data:
-                continue
-            
-            # Process calls
-            calls = time_data["options"]["calls"]
-            if (calls["tn_ratio"] > TN_RATIO_THRESHOLD and 
-                calls["bullish"] > calls["bearish"]):
-                
-                time_data["stock"] = stock_name
-                c_stocks.append(time_data)
-            
-            # Process puts
-            puts = time_data["options"]["puts"]
-            if (puts["tn_ratio"] > TN_RATIO_THRESHOLD and 
-                puts["bullish"] > puts["bearish"]):
-                
-                time_data["stock"] = stock_name
-                p_stocks.append(time_data)
-    
-    # Group and check consecutive appearances
-    call_prediction = check_consecutive_appearances_optimized(c_stocks)
-    put_prediction = check_consecutive_appearances_optimized(p_stocks)
-    
-    return {
-        "call": call_prediction,
-        "put": put_prediction
-    }
-
-def check_consecutive_appearances_optimized(stocks_data):
-    """Optimized consecutive appearance checking"""
-    if not stocks_data:
-        return set()
-    
-    # Group by stock name
-    stock_groups = defaultdict(list)
-    for data in stocks_data:
-        stock_name = data.get("stock")
-        timestamp = data.get("time_stamp")
-        if stock_name and timestamp:
-            stock_groups[stock_name].append(timestamp)
-    
-    # Check for consecutive appearances
-    result = set()
-    for stock, timestamps in stock_groups.items():
-        if len(timestamps) > 1:
-            timestamps.sort()
-            # Check for consecutive 15-minute intervals
-            for i in range(1, len(timestamps)):
-                if timestamps[i] - timestamps[i-1] == timedelta(minutes=15):
-                    result.add((timestamps[i], stock))
-    
-    return result
+# Option ranking functionality moved to separate module option_ranking_optimized.py
 
 # Main optimized function
 async def main_optimized():
@@ -753,7 +685,8 @@ async def main_optimized():
         
         # Get all available trading dates from database
         logger.info("Fetching available trading dates from database...")
-        trading_dates = await get_available_trading_dates()
+        # trading_dates = await get_available_trading_dates()
+        trading_dates = ["2025-05-08"]
         
         if not trading_dates:
             logger.error("No trading dates found in database. Exiting.")
@@ -824,7 +757,7 @@ async def main_optimized():
             # Generate filename based on date range
             start_date = trading_dates[0].replace("-", "")
             end_date = trading_dates[-1].replace("-", "")
-            filename = f'analyzed_stocks_data_optimized_{start_date}_to_{end_date}.pickle'
+            filename = f'analyzed_stocks_data_optimized_{start_date}_to_{end_date}_close.pickle'
             
             with open(filename, 'wb') as handle:
                 pickle.dump(all_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -832,31 +765,34 @@ async def main_optimized():
         except Exception as save_error:
             logger.error(f"Error saving results: {save_error}")
         
-        # Generate predictions
+        # Generate predictions using external OptionRankingOptimized module
         try:
-            prediction = option_ranking_optimized(all_results)
+            # Initialize the option ranking optimizer
+            ranker = OptionRankingOptimized()
+            prediction = ranker.rank_options(all_results)
             
             # Generate filename based on date range
             start_date = trading_dates[0].replace("-", "")
             end_date = trading_dates[-1].replace("-", "")
-            pred_filename = f'prediction_optimized_{start_date}_to_{end_date}.pickle'
+            pred_filename = f'prediction_optimized_{start_date}_to_{end_date}_close.pickle'
             
             with open(pred_filename, 'wb') as handle:
                 pickle.dump(prediction, handle, protocol=pickle.HIGHEST_PROTOCOL)
             
-            logger.info(f"Predictions generated: {len(prediction['call'])} calls, {len(prediction['put'])} puts")
+            # Calculate prediction counts for logging
+            call_count = sum(len(pred.get("stock_data", [])) for pred in prediction.get("call", []))
+            put_count = sum(len(pred.get("stock_data", [])) for pred in prediction.get("put", []))
+            
+            logger.info(f"Predictions generated: {call_count} calls, {put_count} puts")
             logger.info(f"Predictions saved to {pred_filename}")
             
             # Export to Excel
             try:
-                from option_ranking_optimized import export_predictions_to_excel
-                excel_filename = f"option_predictions_optimized_{start_date}_to_{end_date}.xlsx"
+                excel_filename = f"option_predictions_optimized_{start_date}_to_{end_date}_close.xlsx"
                 if export_predictions_to_excel(prediction, excel_filename):
                     logger.info(f"Excel export successful: {excel_filename}")
                 else:
                     logger.warning(f"Excel export failed for {excel_filename}")
-            except ImportError as import_error:
-                logger.error(f"Could not import Excel export function: {import_error}")
             except Exception as excel_error:
                 logger.error(f"Error exporting to Excel: {excel_error}")
             
