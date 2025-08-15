@@ -10,6 +10,49 @@
 			"request": "launch",
 			"program": "${file}",
 			"console": "integratedTerminal",
+		},
+		{
+			"name": "Debug Data Collection - Single Date",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/src/data_collection/opt-stk-data-to-db-upstox.py",
+			"args": ["2024-07-10"],
+			"console": "integratedTerminal",
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"name": "Debug Data Collection - Date Range",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/src/data_collection/opt-stk-data-to-db-upstox.py",
+			"args": ["2024-07-26", "2024-07-30"],
+			"console": "integratedTerminal",
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"name": "Debug Analysis Script",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/src/analysis/option_analyze.py",
+			"console": "integratedTerminal",
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"name": "Debug Current File with Input Args",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${file}",
+			"args": ["${input:scriptArgs}"],
+			"console": "integratedTerminal",
+			"cwd": "${workspaceFolder}"
+		}
+	],
+	"inputs": [
+		{
+			"id": "scriptArgs",
+			"description": "Script arguments",
+			"type": "promptForInput",
+			"default": "2024-07-26"
 		}
 	]
 }

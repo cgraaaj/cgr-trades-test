@@ -689,7 +689,7 @@ class OptionRankingOptimized:
         return dict(sorted(grouped.items()))
     
     def find_consecutive_appearances(self, grouped_predictions: Dict[datetime, List[StockPrediction]]) -> Dict[str, List[StockPrediction]]:
-        """Find stocks that appear in consecutive time intervals (exactly 15 minutes apart)"""
+        """Find stocks that appear in consecutive time intervals (configurable window)"""
         consecutive_by_date = defaultdict(list)
         
         timestamps = sorted(grouped_predictions.keys())
@@ -706,10 +706,10 @@ class OptionRankingOptimized:
             
             current_stocks = {pred.stock for pred in grouped_predictions[timestamp]}
             
-            # Check if current timestamp is exactly 15 minutes after previous timestamp
+            # Check if current timestamp is exactly CONSECUTIVE_WINDOW_MINUTES after previous timestamp
             if prev_timestamp is not None:
                 time_diff = timestamp - prev_timestamp
-                is_consecutive = time_diff == timedelta(minutes=15)
+                is_consecutive = time_diff == timedelta(minutes=CONSECUTIVE_WINDOW_MINUTES)
                 
                 if is_consecutive:
                     # Find stocks that appeared in previous interval

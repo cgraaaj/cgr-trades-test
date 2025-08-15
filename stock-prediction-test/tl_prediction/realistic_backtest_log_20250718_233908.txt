@@ -1,0 +1,1421 @@
+🚀 REALISTIC CONCURRENT TRADING BACKTEST
+⏰ Started at: 2025-07-18 23:39:08
+📝 Logging to: realistic_backtest_log_20250718_233908.txt
+======================================================================
+Loading data for realistic concurrent INTRADAY backtest...
+Loaded 13075 OHLC records
+Loaded 434 predictions
+INTRADAY ONLY: All positions close by 2:45 PM (avoid market close volatility)
+ENTRY DELAY: Trades executed 0 minutes after prediction time
+Processing 100 trading days...
+
+--- TRADING DAY 1: 2024-07-26 ---
+  13:30 Opened LONG #1: SHRIRAMFIN @ ₹566.60 (pred: 13:30)
+  13:45 Closed LONG #1: SHRIRAMFIN @ ₹572.27 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹3,995 (+0.40%)
+  💰 Total Capital: ₹1,003,995 (Available: ₹1,003,995)
+
+--- TRADING DAY 2: 2024-07-29 ---
+  09:45 Opened LONG #2: LT @ ₹3722.75 (pred: 09:45)
+  09:45 Closed LONG #2: LT @ ₹3759.98 (Take Profit)
+  11:00 Opened LONG #3: CHOLAFIN @ ₹1410.55 (pred: 11:00)
+  11:00 Closed LONG #3: CHOLAFIN @ ₹1424.66 (Take Profit)
+  12:45 Opened LONG #4: ULTRACEMCO @ ₹11844.40 (pred: 12:45)
+  13:30 Opened LONG #5: HAL @ ₹5024.95 (pred: 13:30)
+  13:45 Closed LONG #5: HAL @ ₹4999.83 (Stop Loss)
+  14:45 Auto-closed LONG #4: ULTRACEMCO @ ₹11844.00 (Avoid Close Volatility)
+  End of day: 4 trades completed
+  📈 Daily P&L: ₹6,791 (+0.68%)
+  💰 Total Capital: ₹1,010,785 (Available: ₹1,010,785)
+
+--- TRADING DAY 3: 2024-07-30 ---
+  10:00 Opened LONG #6: TRENT @ ₹5616.80 (pred: 10:00)
+  11:00 Opened LONG #7: TATAMOTORS @ ₹1160.25 (pred: 11:00)
+  11:15 Closed LONG #7: TATAMOTORS @ ₹1171.85 (Take Profit)
+  11:30 Opened LONG #8: HEROMOTOCO @ ₹5505.10 (pred: 11:30)
+  11:30 Opened LONG #9: MARUTI @ ₹12842.50 (pred: 11:30)
+  12:00 Opened SHORT #10: HAL @ ₹5019.65 (pred: 12:00)
+  12:00 Closed SHORT #10: HAL @ ₹4969.45 (Take Profit)
+  13:45 Closed LONG #8: HEROMOTOCO @ ₹5477.57 (Stop Loss)
+  14:00 Closed LONG #6: TRENT @ ₹5588.72 (Stop Loss)
+  14:45 Auto-closed LONG #9: MARUTI @ ₹12860.00 (Avoid Close Volatility)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹327 (+0.03%)
+  💰 Total Capital: ₹1,011,113 (Available: ₹1,011,113)
+
+--- TRADING DAY 4: 2024-07-31 ---
+  09:45 Opened SHORT #11: DIXON @ ₹12199.95 (pred: 09:45)
+  10:00 Closed SHORT #11: DIXON @ ₹12260.95 (Stop Loss)
+  11:45 Opened LONG #12: GODREJPROP @ ₹3208.00 (pred: 11:45)
+  11:45 Closed LONG #12: GODREJPROP @ ₹3191.96 (Stop Loss)
+  End of day: 2 trades completed
+  📉 Daily P&L: ₹-2,981 (-0.29%)
+  💰 Total Capital: ₹1,008,132 (Available: ₹1,008,132)
+
+--- TRADING DAY 5: 2024-08-01 ---
+  10:15 Opened SHORT #13: MARUTI @ ₹13493.75 (pred: 10:15)
+  10:30 Closed SHORT #13: MARUTI @ ₹13358.81 (Take Profit)
+  10:45 Opened SHORT #14: HAL @ ₹4825.00 (pred: 10:45)
+  13:30 Opened LONG #15: ADANIENT @ ₹3216.75 (pred: 13:30)
+  14:30 Closed LONG #15: ADANIENT @ ₹3200.67 (Stop Loss)
+  14:45 Auto-closed SHORT #14: HAL @ ₹4804.00 (Avoid Close Volatility)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹4,739 (+0.47%)
+  💰 Total Capital: ₹1,012,871 (Available: ₹1,012,871)
+
+--- TRADING DAY 6: 2024-08-02 ---
+  10:00 Opened LONG #16: HAL @ ₹4685.00 (pred: 10:00)
+  10:15 Opened LONG #17: NAUKRI @ ₹1432.00 (pred: 10:15)
+  10:15 Opened LONG #18: ADANIENT @ ₹3144.85 (pred: 10:15)
+  10:15 Closed LONG #17: NAUKRI @ ₹1446.32 (Take Profit)
+  10:30 Closed LONG #16: HAL @ ₹4731.85 (Take Profit)
+  10:45 Closed LONG #18: ADANIENT @ ₹3176.30 (Take Profit)
+  11:15 Opened SHORT #19: MARUTI @ ₹12841.60 (pred: 11:15)
+  13:45 Opened LONG #20: HEROMOTOCO @ ₹5270.65 (pred: 13:45)
+  14:00 Opened SHORT #21: TRENT @ ₹5596.65 (pred: 14:00)
+  14:45 Closed SHORT #19: MARUTI @ ₹12713.18 (Take Profit)
+  14:45 Auto-closed LONG #20: HEROMOTOCO @ ₹5283.50 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #21: TRENT @ ₹5549.35 (Avoid Close Volatility)
+  End of day: 6 trades completed
+  📈 Daily P&L: ₹13,110 (+1.29%)
+  💰 Total Capital: ₹1,025,981 (Available: ₹1,025,981)
+
+--- TRADING DAY 7: 2024-08-05 ---
+  09:45 Opened LONG #22: ADANIPORTS @ ₹1547.70 (pred: 09:45)
+  09:45 Opened LONG #23: ADANIENT @ ₹3114.75 (pred: 09:45)
+  09:45 Opened LONG #24: HAL @ ₹4575.15 (pred: 09:45)
+  09:45 Closed LONG #24: HAL @ ₹4620.90 (Take Profit)
+  10:00 Closed LONG #23: ADANIENT @ ₹3099.18 (Stop Loss)
+  10:15 Opened SHORT #25: COFORGE @ ₹1157.50 (pred: 10:15)
+  10:15 Opened SHORT #26: TATAMOTORS @ ₹1051.60 (pred: 10:15)
+  10:30 Opened SHORT #27: DIVISLAB @ ₹4848.55 (pred: 10:30)
+  10:30 Closed LONG #22: ADANIPORTS @ ₹1539.96 (Stop Loss)
+  10:30 Closed SHORT #25: COFORGE @ ₹1163.29 (Stop Loss)
+  10:30 Closed SHORT #26: TATAMOTORS @ ₹1041.08 (Take Profit)
+  10:30 Closed SHORT #27: DIVISLAB @ ₹4800.06 (Take Profit)
+  10:45 Opened SHORT #28: TATACHEM @ ₹1071.20 (pred: 10:45)
+  10:45 Opened SHORT #29: MARUTI @ ₹12272.70 (pred: 10:45)
+  10:45 Opened SHORT #30: SBIN @ ₹820.05 (pred: 10:45)
+  10:45 Opened SHORT #31: LT @ ₹3564.45 (pred: 10:45)
+  11:00 Opened SHORT #32: ONGC @ ₹312.45 (pred: 11:00)
+  11:00 Opened SHORT #33: ADANIPORTS @ ₹1528.00 (pred: 11:00)
+  11:00 Opened SHORT #34: BHARTIARTL @ ₹1462.50 (pred: 11:00)
+  11:00 Opened SHORT #35: ADANIENT @ ₹3055.70 (pred: 11:00)
+  11:00 Opened SHORT #36: HCLTECH @ ₹1570.60 (pred: 11:00)
+  11:00 Opened SHORT #37: KOTAKBANK @ ₹1777.45 (pred: 11:00)
+  11:00 Opened SHORT #38: RECLTD @ ₹580.30 (pred: 11:00)
+  11:00 Closed SHORT #29: MARUTI @ ₹12149.97 (Take Profit)
+  11:00 Closed SHORT #30: SBIN @ ₹811.85 (Take Profit)
+  11:00 Closed SHORT #32: ONGC @ ₹314.01 (Stop Loss)
+  11:00 Closed SHORT #36: HCLTECH @ ₹1554.89 (Take Profit)
+  11:15 Opened SHORT #39: SHRIRAMFIN @ ₹570.00 (pred: 11:15)
+  11:15 Opened SHORT #40: DIXON @ ₹11040.15 (pred: 11:15)
+  11:15 Opened SHORT #41: INFY @ ₹1738.00 (pred: 11:15)
+  11:15 Closed SHORT #28: TATACHEM @ ₹1060.49 (Take Profit)
+  11:15 Closed SHORT #31: LT @ ₹3528.81 (Take Profit)
+  11:15 Closed SHORT #33: ADANIPORTS @ ₹1512.72 (Take Profit)
+  11:15 Closed SHORT #35: ADANIENT @ ₹3025.14 (Take Profit)
+  11:15 Closed SHORT #38: RECLTD @ ₹574.50 (Take Profit)
+  11:15 Closed SHORT #39: SHRIRAMFIN @ ₹564.30 (Take Profit)
+  11:15 Closed SHORT #40: DIXON @ ₹11095.35 (Stop Loss)
+  11:30 Opened SHORT #42: TRENT @ ₹5277.55 (pred: 11:30)
+  11:30 Opened LONG #43: OFSS @ ₹9719.70 (pred: 11:30)
+  11:30 Closed SHORT #41: INFY @ ₹1720.62 (Take Profit)
+  11:30 Closed LONG #43: OFSS @ ₹9671.10 (Stop Loss)
+  12:00 Opened LONG #44: TRENT @ ₹5280.25 (pred: 12:00)
+  12:00 Closed SHORT #42: TRENT @ ₹5303.94 (Stop Loss)
+  13:15 Closed LONG #44: TRENT @ ₹5333.05 (Take Profit)
+  14:45 Auto-closed SHORT #34: BHARTIARTL @ ₹1464.80 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #37: KOTAKBANK @ ₹1773.30 (Avoid Close Volatility)
+  End of day: 23 trades completed
+  📈 Daily P&L: ₹13,601 (+1.33%)
+  💰 Total Capital: ₹1,039,581 (Available: ₹1,039,581)
+
+--- TRADING DAY 8: 2024-08-06 ---
+  10:30 Opened SHORT #45: MARUTI @ ₹12369.40 (pred: 10:30)
+  13:30 Closed SHORT #45: MARUTI @ ₹12245.71 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹4,082 (+0.39%)
+  💰 Total Capital: ₹1,043,663 (Available: ₹1,043,663)
+
+--- TRADING DAY 9: 2024-08-07 ---
+  12:45 Opened LONG #46: CUMMINSIND @ ₹3773.20 (pred: 12:45)
+  12:45 Closed LONG #46: CUMMINSIND @ ₹3810.93 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹4,151 (+0.40%)
+  💰 Total Capital: ₹1,047,814 (Available: ₹1,047,814)
+
+--- TRADING DAY 10: 2024-08-08 ---
+  12:00 Opened LONG #47: OFSS @ ₹10260.40 (pred: 12:00)
+  12:15 Closed LONG #47: OFSS @ ₹10363.00 (Take Profit)
+  12:45 Opened SHORT #48: VOLTAS @ ₹1484.05 (pred: 12:45)
+  12:45 Closed SHORT #48: VOLTAS @ ₹1469.21 (Take Profit)
+  13:00 Opened LONG #49: BHARATFORG @ ₹1613.90 (pred: 13:00)
+  13:00 Closed LONG #49: BHARATFORG @ ₹1605.83 (Stop Loss)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹6,198 (+0.59%)
+  💰 Total Capital: ₹1,054,012 (Available: ₹1,054,012)
+
+--- TRADING DAY 11: 2024-08-09 ---
+  12:30 Opened LONG #50: EICHERMOT @ ₹4836.45 (pred: 12:30)
+  13:00 Opened LONG #51: TRENT @ ₹6157.25 (pred: 13:00)
+  13:00 Closed LONG #51: TRENT @ ₹6126.46 (Stop Loss)
+  14:45 Auto-closed LONG #50: EICHERMOT @ ₹4829.95 (Avoid Close Volatility)
+  End of day: 2 trades completed
+  📉 Daily P&L: ₹-1,828 (-0.17%)
+  💰 Total Capital: ₹1,052,184 (Available: ₹1,052,184)
+
+--- TRADING DAY 12: 2024-08-12 ---
+  09:45 Opened SHORT #52: ADANIENT @ ₹3064.50 (pred: 09:45)
+  09:45 Closed SHORT #52: ADANIENT @ ₹3033.86 (Take Profit)
+  10:15 Opened LONG #53: ADANIENT @ ₹3069.95 (pred: 10:15)
+  10:15 Closed LONG #53: ADANIENT @ ₹3100.65 (Take Profit)
+  11:45 Opened LONG #54: VOLTAS @ ₹1553.80 (pred: 11:45)
+  12:45 Closed LONG #54: VOLTAS @ ₹1569.34 (Take Profit)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹12,646 (+1.20%)
+  💰 Total Capital: ₹1,064,830 (Available: ₹1,064,830)
+
+--- TRADING DAY 13: 2024-08-14 ---
+  09:45 Opened SHORT #55: HEROMOTOCO @ ₹5059.80 (pred: 09:45)
+  10:15 Opened LONG #56: APOLLOHOSP @ ₹6739.80 (pred: 10:15)
+  10:15 Closed SHORT #55: HEROMOTOCO @ ₹5009.20 (Take Profit)
+  10:15 Closed LONG #56: APOLLOHOSP @ ₹6807.20 (Take Profit)
+  10:45 Opened LONG #57: HEROMOTOCO @ ₹5112.10 (pred: 10:45)
+  10:45 Closed LONG #57: HEROMOTOCO @ ₹5163.22 (Take Profit)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹10,396 (+0.98%)
+  💰 Total Capital: ₹1,075,226 (Available: ₹1,075,226)
+
+--- TRADING DAY 14: 2024-08-16 ---
+  10:00 Opened SHORT #58: AUROPHARMA @ ₹1455.40 (pred: 10:00)
+  10:00 Closed SHORT #58: AUROPHARMA @ ₹1440.85 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹4,293 (+0.40%)
+  💰 Total Capital: ₹1,079,520 (Available: ₹1,079,520)
+
+--- TRADING DAY 15: 2024-08-20 ---
+  10:15 Opened LONG #59: HEROMOTOCO @ ₹5297.00 (pred: 10:15)
+  11:00 Closed LONG #59: HEROMOTOCO @ ₹5349.97 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹4,291 (+0.40%)
+  💰 Total Capital: ₹1,083,810 (Available: ₹1,083,810)
+
+--- TRADING DAY 16: 2024-08-23 ---
+  10:30 Opened LONG #60: INDIGO @ ₹4609.10 (pred: 10:30)
+  10:45 Closed LONG #60: INDIGO @ ₹4655.19 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹4,333 (+0.40%)
+  💰 Total Capital: ₹1,088,143 (Available: ₹1,088,143)
+
+--- TRADING DAY 17: 2024-08-30 ---
+  10:30 Opened LONG #61: HAL @ ₹4630.95 (pred: 10:30)
+  10:45 Opened LONG #62: COFORGE @ ₹1259.00 (pred: 10:45)
+  10:45 Closed LONG #61: HAL @ ₹4677.26 (Take Profit)
+  11:15 Opened SHORT #63: HEROMOTOCO @ ₹5461.00 (pred: 11:15)
+  12:15 Opened LONG #64: BAJFINANCE @ ₹714.00 (pred: 12:15)
+  12:15 Closed LONG #62: COFORGE @ ₹1271.59 (Take Profit)
+  12:30 Opened LONG #65: HEROMOTOCO @ ₹5442.00 (pred: 12:30)
+  13:30 Closed LONG #64: BAJFINANCE @ ₹721.14 (Take Profit)
+  14:45 Auto-closed SHORT #63: HEROMOTOCO @ ₹5440.60 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #65: HEROMOTOCO @ ₹5440.60 (Avoid Close Volatility)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹9,707 (+0.89%)
+  💰 Total Capital: ₹1,097,850 (Available: ₹1,097,850)
+
+--- TRADING DAY 18: 2024-10-01 ---
+  09:45 Opened LONG #66: GODREJPROP @ ₹3196.60 (pred: 09:45)
+  10:15 Opened SHORT #67: AUROPHARMA @ ₹1432.25 (pred: 10:15)
+  10:15 Closed LONG #66: GODREJPROP @ ₹3180.62 (Stop Loss)
+  10:15 Closed SHORT #67: AUROPHARMA @ ₹1417.93 (Take Profit)
+  10:30 Opened SHORT #68: GODREJPROP @ ₹3183.65 (pred: 10:30)
+  11:45 Opened LONG #69: INFY @ ₹1890.50 (pred: 11:45)
+  12:00 Opened LONG #70: NATIONALUM @ ₹220.72 (pred: 12:00)
+  12:00 Opened LONG #71: ADANIENT @ ₹3128.50 (pred: 12:00)
+  12:00 Closed LONG #70: NATIONALUM @ ₹222.93 (Take Profit)
+  12:30 Closed SHORT #68: GODREJPROP @ ₹3199.57 (Stop Loss)
+  12:45 Opened SHORT #72: HEROMOTOCO @ ₹5714.90 (pred: 12:45)
+  12:45 Closed LONG #71: ADANIENT @ ₹3159.78 (Take Profit)
+  13:15 Opened LONG #73: GRANULES @ ₹577.15 (pred: 13:15)
+  13:15 Closed SHORT #72: HEROMOTOCO @ ₹5743.47 (Stop Loss)
+  14:45 Auto-closed LONG #69: INFY @ ₹1900.95 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #73: GRANULES @ ₹576.80 (Avoid Close Volatility)
+  End of day: 8 trades completed
+  📈 Daily P&L: ₹3,651 (+0.33%)
+  💰 Total Capital: ₹1,101,501 (Available: ₹1,101,501)
+
+--- TRADING DAY 19: 2024-10-03 ---
+  10:00 Opened SHORT #74: HEROMOTOCO @ ₹5704.95 (pred: 10:00)
+  10:00 Opened SHORT #75: LT @ ₹3585.95 (pred: 10:00)
+  10:00 Closed SHORT #74: HEROMOTOCO @ ₹5647.90 (Take Profit)
+  10:45 Opened LONG #76: PETRONET @ ₹357.00 (pred: 10:45)
+  10:45 Closed SHORT #75: LT @ ₹3550.09 (Take Profit)
+  10:45 Closed LONG #76: PETRONET @ ₹360.57 (Take Profit)
+  11:00 Opened LONG #77: HEROMOTOCO @ ₹5667.65 (pred: 11:00)
+  11:15 Opened SHORT #78: COFORGE @ ₹1429.50 (pred: 11:15)
+  11:15 Opened SHORT #79: PERSISTENT @ ₹5297.50 (pred: 11:15)
+  11:30 Opened SHORT #80: INDIGO @ ₹4772.30 (pred: 11:30)
+  11:30 Opened SHORT #81: ADANIENT @ ₹3132.90 (pred: 11:30)
+  11:30 Opened SHORT #82: GODREJPROP @ ₹3159.25 (pred: 11:30)
+  12:00 Closed SHORT #79: PERSISTENT @ ₹5244.52 (Take Profit)
+  12:00 Closed SHORT #80: INDIGO @ ₹4724.58 (Take Profit)
+  12:15 Closed SHORT #78: COFORGE @ ₹1415.20 (Take Profit)
+  12:15 Closed SHORT #82: GODREJPROP @ ₹3127.66 (Take Profit)
+  13:00 Opened SHORT #83: BOSCHLTD @ ₹37380.30 (pred: 13:00)
+  13:15 Closed LONG #77: HEROMOTOCO @ ₹5639.31 (Stop Loss)
+  13:15 Closed SHORT #81: ADANIENT @ ₹3101.57 (Take Profit)
+  13:30 Opened SHORT #84: MARUTI @ ₹12755.60 (pred: 13:30)
+  13:30 Opened SHORT #85: BAJFINANCE @ ₹744.00 (pred: 13:30)
+  13:45 Closed SHORT #84: MARUTI @ ₹12628.04 (Take Profit)
+  14:45 Auto-closed SHORT #83: BOSCHLTD @ ₹37100.00 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #85: BAJFINANCE @ ₹742.00 (Avoid Close Volatility)
+  End of day: 12 trades completed
+  📈 Daily P&L: ₹22,545 (+2.05%)
+  💰 Total Capital: ₹1,124,046 (Available: ₹1,124,046)
+
+--- TRADING DAY 20: 2024-10-04 ---
+  09:45 Opened LONG #86: HEROMOTOCO @ ₹5583.90 (pred: 09:45)
+  09:45 Opened LONG #87: MARUTI @ ₹12693.80 (pred: 09:45)
+  09:45 Opened LONG #88: HAL @ ₹4251.00 (pred: 09:45)
+  09:45 Opened LONG #89: ADANIENT @ ₹3102.00 (pred: 09:45)
+  09:45 Closed LONG #87: MARUTI @ ₹12820.74 (Take Profit)
+  09:45 Closed LONG #88: HAL @ ₹4293.51 (Take Profit)
+  10:15 Opened SHORT #90: SHRIRAMFIN @ ₹670.35 (pred: 10:15)
+  10:15 Opened SHORT #91: GODREJPROP @ ₹2980.85 (pred: 10:15)
+  10:15 Opened SHORT #92: INDIGO @ ₹4680.00 (pred: 10:15)
+  10:15 Opened SHORT #93: ADANIENT @ ₹3122.05 (pred: 10:15)
+  10:15 Opened SHORT #94: BAJFINANCE @ ₹729.50 (pred: 10:15)
+  10:15 Opened SHORT #95: MARUTI @ ₹12831.15 (pred: 10:15)
+  10:30 Opened LONG #96: TATACHEM @ ₹1149.45 (pred: 10:30)
+  10:30 Opened LONG #97: INFY @ ₹1917.85 (pred: 10:30)
+  10:45 Closed SHORT #94: BAJFINANCE @ ₹733.15 (Stop Loss)
+  11:00 Closed SHORT #91: GODREJPROP @ ₹2951.04 (Take Profit)
+  11:00 Closed SHORT #92: INDIGO @ ₹4703.40 (Stop Loss)
+  11:00 Closed LONG #97: INFY @ ₹1937.03 (Take Profit)
+  11:15 Closed LONG #89: ADANIENT @ ₹3133.02 (Take Profit)
+  11:15 Closed SHORT #95: MARUTI @ ₹12702.84 (Take Profit)
+  11:15 Closed LONG #96: TATACHEM @ ₹1143.70 (Stop Loss)
+  11:30 Closed SHORT #93: ADANIENT @ ₹3137.66 (Stop Loss)
+  11:45 Opened LONG #98: TCS @ ₹4268.95 (pred: 11:45)
+  12:15 Closed SHORT #90: SHRIRAMFIN @ ₹673.70 (Stop Loss)
+  12:30 Closed LONG #86: HEROMOTOCO @ ₹5555.98 (Stop Loss)
+  12:30 Closed LONG #98: TCS @ ₹4247.61 (Stop Loss)
+  12:45 Opened SHORT #99: HEROMOTOCO @ ₹5556.65 (pred: 12:45)
+  12:45 Opened SHORT #100: PERSISTENT @ ₹5157.85 (pred: 12:45)
+  12:45 Opened SHORT #101: INFY @ ₹1929.50 (pred: 12:45)
+  12:45 Opened SHORT #102: DLF @ ₹854.35 (pred: 12:45)
+  13:00 Opened SHORT #103: BOSCHLTD @ ₹36625.00 (pred: 13:00)
+  13:00 Opened SHORT #104: GRANULES @ ₹573.50 (pred: 13:00)
+  13:00 Closed SHORT #104: GRANULES @ ₹567.76 (Take Profit)
+  13:15 Opened SHORT #105: M&M @ ₹3044.25 (pred: 13:15)
+  13:15 Closed SHORT #100: PERSISTENT @ ₹5106.27 (Take Profit)
+  13:15 Closed SHORT #103: BOSCHLTD @ ₹36808.12 (Stop Loss)
+  13:30 Closed SHORT #102: DLF @ ₹845.81 (Take Profit)
+  14:15 Closed SHORT #99: HEROMOTOCO @ ₹5501.08 (Take Profit)
+  14:45 Closed SHORT #105: M&M @ ₹3013.81 (Take Profit)
+  14:45 Auto-closed SHORT #101: INFY @ ₹1922.00 (Avoid Close Volatility)
+  End of day: 20 trades completed
+  📈 Daily P&L: ₹11,442 (+1.02%)
+  💰 Total Capital: ₹1,135,487 (Available: ₹1,135,487)
+
+--- TRADING DAY 21: 2024-10-07 ---
+  09:45 Opened SHORT #106: ADANIENT @ ₹3091.40 (pred: 09:45)
+  09:45 Opened SHORT #107: GODREJPROP @ ₹2961.75 (pred: 09:45)
+  09:45 Opened SHORT #108: TATAPOWER @ ₹457.90 (pred: 09:45)
+  09:45 Closed SHORT #108: TATAPOWER @ ₹453.32 (Take Profit)
+  10:00 Opened SHORT #109: MPHASIS @ ₹2944.40 (pred: 10:00)
+  10:00 Closed SHORT #106: ADANIENT @ ₹3060.49 (Take Profit)
+  10:00 Closed SHORT #107: GODREJPROP @ ₹2932.13 (Take Profit)
+  10:00 Closed SHORT #109: MPHASIS @ ₹2914.96 (Take Profit)
+  10:15 Opened SHORT #110: PERSISTENT @ ₹5225.00 (pred: 10:15)
+  10:30 Opened SHORT #111: INDIGO @ ₹4558.80 (pred: 10:30)
+  10:30 Closed SHORT #110: PERSISTENT @ ₹5172.75 (Take Profit)
+  10:45 Opened SHORT #112: INDHOTEL @ ₹654.75 (pred: 10:45)
+  10:45 Opened SHORT #113: COFORGE @ ₹1431.50 (pred: 10:45)
+  10:45 Closed SHORT #112: INDHOTEL @ ₹648.20 (Take Profit)
+  11:00 Closed SHORT #111: INDIGO @ ₹4513.21 (Take Profit)
+  11:15 Opened LONG #114: ADANIENT @ ₹3025.75 (pred: 11:15)
+  11:15 Opened LONG #115: MPHASIS @ ₹2895.00 (pred: 11:15)
+  11:15 Closed SHORT #113: COFORGE @ ₹1438.66 (Stop Loss)
+  11:30 Opened LONG #116: TCS @ ₹4256.00 (pred: 11:30)
+  11:45 Opened SHORT #117: BAJFINANCE @ ₹729.00 (pred: 11:45)
+  12:00 Closed LONG #115: MPHASIS @ ₹2880.53 (Stop Loss)
+  12:45 Closed LONG #114: ADANIENT @ ₹3010.62 (Stop Loss)
+  13:00 Opened SHORT #118: BOSCHLTD @ ₹36781.85 (pred: 13:00)
+  13:00 Opened SHORT #119: AXISBANK @ ₹1154.50 (pred: 13:00)
+  13:00 Closed SHORT #117: BAJFINANCE @ ₹721.71 (Take Profit)
+  13:30 Closed SHORT #119: AXISBANK @ ₹1142.95 (Take Profit)
+  14:45 Auto-closed LONG #116: TCS @ ₹4264.00 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #118: BOSCHLTD @ ₹36643.80 (Avoid Close Volatility)
+  End of day: 14 trades completed
+  📈 Daily P&L: ₹21,104 (+1.86%)
+  💰 Total Capital: ₹1,156,591 (Available: ₹1,156,591)
+
+--- TRADING DAY 22: 2024-10-08 ---
+  09:45 Opened SHORT #120: M&M @ ₹3092.00 (pred: 09:45)
+  10:15 Closed SHORT #120: M&M @ ₹3107.46 (Stop Loss)
+  10:30 Opened LONG #121: ADANIENT @ ₹3058.05 (pred: 10:30)
+  10:45 Opened LONG #122: INDIGO @ ₹4503.70 (pred: 10:45)
+  11:00 Closed LONG #122: INDIGO @ ₹4548.74 (Take Profit)
+  11:30 Closed LONG #121: ADANIENT @ ₹3088.63 (Take Profit)
+  12:00 Opened SHORT #123: HEROMOTOCO @ ₹5490.10 (pred: 12:00)
+  13:45 Opened LONG #124: GODREJPROP @ ₹2936.70 (pred: 13:45)
+  14:00 Closed LONG #124: GODREJPROP @ ₹2966.07 (Take Profit)
+  14:45 Auto-closed SHORT #123: HEROMOTOCO @ ₹5502.05 (Avoid Close Volatility)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹6,817 (+0.59%)
+  💰 Total Capital: ₹1,163,408 (Available: ₹1,163,408)
+
+--- TRADING DAY 23: 2024-10-09 ---
+  09:45 Opened LONG #125: TATACHEM @ ₹1108.15 (pred: 09:45)
+  09:45 Closed LONG #125: TATACHEM @ ₹1119.23 (Take Profit)
+  10:30 Opened SHORT #126: BAJFINANCE @ ₹736.00 (pred: 10:30)
+  10:45 Opened LONG #127: GODREJPROP @ ₹2965.05 (pred: 10:45)
+  10:45 Opened LONG #128: ADANIENT @ ₹3150.00 (pred: 10:45)
+  11:00 Closed SHORT #126: BAJFINANCE @ ₹739.68 (Stop Loss)
+  11:30 Closed LONG #127: GODREJPROP @ ₹2950.22 (Stop Loss)
+  11:45 Opened SHORT #129: INDIGO @ ₹4724.30 (pred: 11:45)
+  12:15 Closed SHORT #129: INDIGO @ ₹4747.92 (Stop Loss)
+  14:45 Auto-closed LONG #128: ADANIENT @ ₹3159.05 (Avoid Close Volatility)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹2,332 (+0.20%)
+  💰 Total Capital: ₹1,165,740 (Available: ₹1,165,740)
+
+--- TRADING DAY 24: 2024-10-10 ---
+  10:00 Opened LONG #130: TATAPOWER @ ₹474.40 (pred: 10:00)
+  10:30 Closed LONG #130: TATAPOWER @ ₹472.03 (Stop Loss)
+  10:45 Opened LONG #131: ADANIENT @ ₹3119.10 (pred: 10:45)
+  11:00 Closed LONG #131: ADANIENT @ ₹3103.50 (Stop Loss)
+  11:15 Opened SHORT #132: UNITDSPR @ ₹1520.95 (pred: 11:15)
+  11:15 Opened SHORT #133: ADANIENT @ ₹3098.70 (pred: 11:15)
+  12:00 Opened LONG #134: TCS @ ₹4278.45 (pred: 12:00)
+  12:30 Closed SHORT #132: UNITDSPR @ ₹1505.74 (Take Profit)
+  12:45 Opened SHORT #135: HEROMOTOCO @ ₹5497.30 (pred: 12:45)
+  12:45 Closed LONG #134: TCS @ ₹4257.06 (Stop Loss)
+  13:15 Opened LONG #136: GODREJPROP @ ₹3017.50 (pred: 13:15)
+  13:15 Opened SHORT #137: BOSCHLTD @ ₹38195.45 (pred: 13:15)
+  13:30 Opened SHORT #138: PERSISTENT @ ₹5237.85 (pred: 13:30)
+  14:00 Closed LONG #136: GODREJPROP @ ₹3002.41 (Stop Loss)
+  14:15 Closed SHORT #138: PERSISTENT @ ₹5264.04 (Stop Loss)
+  14:45 Closed SHORT #133: ADANIENT @ ₹3114.19 (Stop Loss)
+  14:45 Auto-closed SHORT #135: HEROMOTOCO @ ₹5447.70 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #137: BOSCHLTD @ ₹38123.50 (Avoid Close Volatility)
+  End of day: 9 trades completed
+  📉 Daily P&L: ₹-1,122 (-0.10%)
+  💰 Total Capital: ₹1,164,618 (Available: ₹1,164,618)
+
+--- TRADING DAY 25: 2024-10-11 ---
+  10:00 Opened LONG #139: ADANIENT @ ₹3165.00 (pred: 10:00)
+  10:15 Closed LONG #139: ADANIENT @ ₹3149.18 (Stop Loss)
+  11:15 Opened SHORT #140: CUMMINSIND @ ₹3592.85 (pred: 11:15)
+  14:30 Closed SHORT #140: CUMMINSIND @ ₹3610.81 (Stop Loss)
+  End of day: 2 trades completed
+  📉 Daily P&L: ₹-4,644 (-0.40%)
+  💰 Total Capital: ₹1,159,975 (Available: ₹1,159,975)
+
+--- TRADING DAY 26: 2024-10-14 ---
+  09:45 Opened LONG #141: GODREJPROP @ ₹3031.10 (pred: 09:45)
+  09:45 Closed LONG #141: GODREJPROP @ ₹3061.41 (Take Profit)
+  12:45 Opened LONG #142: HEROMOTOCO @ ₹5553.90 (pred: 12:45)
+  14:00 Opened LONG #143: MPHASIS @ ₹2956.15 (pred: 14:00)
+  14:45 Auto-closed LONG #142: HEROMOTOCO @ ₹5553.00 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #143: MPHASIS @ ₹2962.95 (Avoid Close Volatility)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹5,209 (+0.45%)
+  💰 Total Capital: ₹1,165,183 (Available: ₹1,165,183)
+
+--- TRADING DAY 27: 2024-12-02 ---
+  10:00 Opened SHORT #144: ADANIGREEN @ ₹1370.30 (pred: 10:00)
+  10:00 Closed SHORT #144: ADANIGREEN @ ₹1356.60 (Take Profit)
+  10:30 Opened SHORT #145: DIXON @ ₹16705.00 (pred: 10:30)
+  12:00 Opened LONG #146: M&M @ ₹3007.05 (pred: 12:00)
+  12:00 Closed SHORT #145: DIXON @ ₹16537.95 (Take Profit)
+  14:45 Auto-closed LONG #146: M&M @ ₹3016.00 (Avoid Close Volatility)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹8,108 (+0.70%)
+  💰 Total Capital: ₹1,173,291 (Available: ₹1,173,291)
+
+--- TRADING DAY 28: 2025-02-12 ---
+  10:30 Opened LONG #147: BSE @ ₹1729.00 (pred: 10:30)
+  10:30 Closed LONG #147: BSE @ ₹1746.29 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹4,686 (+0.40%)
+  💰 Total Capital: ₹1,177,977 (Available: ₹1,177,977)
+
+--- TRADING DAY 29: 2025-02-17 ---
+  End of day: 0 trades completed
+  📈 Daily P&L: ₹0 (+0.00%)
+  💰 Total Capital: ₹1,177,977 (Available: ₹1,177,977)
+
+--- TRADING DAY 30: 2025-02-18 ---
+  10:00 Opened SHORT #148: LAURUSLABS @ ₹536.25 (pred: 10:00)
+  10:00 Closed SHORT #148: LAURUSLABS @ ₹530.89 (Take Profit)
+  10:15 Opened SHORT #149: M&M @ ₹2794.45 (pred: 10:15)
+  10:45 Opened LONG #150: TRENT @ ₹5017.75 (pred: 10:45)
+  11:00 Closed LONG #150: TRENT @ ₹4992.66 (Stop Loss)
+  12:00 Closed SHORT #149: M&M @ ₹2766.51 (Take Profit)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹8,728 (+0.74%)
+  💰 Total Capital: ₹1,186,705 (Available: ₹1,186,705)
+
+--- TRADING DAY 31: 2025-02-19 ---
+  09:45 Opened LONG #151: BSE @ ₹1815.50 (pred: 09:45)
+  09:45 Opened LONG #152: M&M @ ₹2751.75 (pred: 09:45)
+  09:45 Closed LONG #151: BSE @ ₹1833.65 (Take Profit)
+  10:30 Closed LONG #152: M&M @ ₹2779.27 (Take Profit)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹5,426 (+0.46%)
+  💰 Total Capital: ₹1,192,131 (Available: ₹1,192,131)
+
+--- TRADING DAY 32: 2025-02-20 ---
+  09:45 Opened LONG #153: HAL @ ₹3388.65 (pred: 09:45)
+  09:45 Opened LONG #154: M&M @ ₹2738.00 (pred: 09:45)
+  09:45 Closed LONG #153: HAL @ ₹3371.71 (Stop Loss)
+  09:45 Closed LONG #154: M&M @ ₹2765.38 (Take Profit)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹2,610 (+0.22%)
+  💰 Total Capital: ₹1,194,742 (Available: ₹1,194,742)
+
+--- TRADING DAY 33: 2025-02-21 ---
+  09:45 Opened SHORT #155: BSE @ ₹1968.00 (pred: 09:45)
+  09:45 Closed SHORT #155: BSE @ ₹1977.84 (Stop Loss)
+  10:30 Opened LONG #156: BSE @ ₹1939.00 (pred: 10:30)
+  10:45 Closed LONG #156: BSE @ ₹1929.31 (Stop Loss)
+  End of day: 2 trades completed
+  📉 Daily P&L: ₹-2,374 (-0.20%)
+  💰 Total Capital: ₹1,192,368 (Available: ₹1,192,368)
+
+--- TRADING DAY 34: 2025-02-28 ---
+  09:45 Opened SHORT #157: BAJFINANCE @ ₹862.00 (pred: 09:45)
+  10:00 Opened SHORT #158: PFC @ ₹367.20 (pred: 10:00)
+  10:15 Opened LONG #159: KEI @ ₹3114.00 (pred: 10:15)
+  10:15 Closed LONG #159: KEI @ ₹3145.14 (Take Profit)
+  10:30 Opened LONG #160: M&M @ ₹2638.70 (pred: 10:30)
+  11:15 Closed LONG #160: M&M @ ₹2625.51 (Stop Loss)
+  11:45 Closed SHORT #158: PFC @ ₹363.53 (Take Profit)
+  12:00 Opened SHORT #161: VEDL @ ₹398.45 (pred: 12:00)
+  12:15 Opened LONG #162: BSE @ ₹1564.00 (pred: 12:15)
+  12:15 Closed LONG #162: BSE @ ₹1556.18 (Stop Loss)
+  12:30 Closed SHORT #161: VEDL @ ₹394.47 (Take Profit)
+  12:45 Opened SHORT #163: SBIN @ ₹685.05 (pred: 12:45)
+  12:45 Opened SHORT #164: COALINDIA @ ₹368.75 (pred: 12:45)
+  12:45 Closed SHORT #157: BAJFINANCE @ ₹853.38 (Take Profit)
+  13:30 Closed SHORT #164: COALINDIA @ ₹370.59 (Stop Loss)
+  14:30 Closed SHORT #163: SBIN @ ₹688.48 (Stop Loss)
+  End of day: 8 trades completed
+  📈 Daily P&L: ₹6,515 (+0.55%)
+  💰 Total Capital: ₹1,198,882 (Available: ₹1,198,882)
+
+--- TRADING DAY 35: 2025-03-03 ---
+  09:45 Opened LONG #165: BSE @ ₹1496.50 (pred: 09:45)
+  09:45 Opened SHORT #166: TATAMOTORS @ ₹613.00 (pred: 09:45)
+  09:45 Opened SHORT #167: ADANIPORTS @ ₹1061.35 (pred: 09:45)
+  09:45 Opened SHORT #168: RELIANCE @ ₹1167.60 (pred: 09:45)
+  09:45 Closed LONG #165: BSE @ ₹1511.46 (Take Profit)
+  10:00 Opened SHORT #169: VEDL @ ₹395.40 (pred: 10:00)
+  10:00 Closed SHORT #166: TATAMOTORS @ ₹606.87 (Take Profit)
+  10:00 Closed SHORT #167: ADANIPORTS @ ₹1050.74 (Take Profit)
+  10:00 Closed SHORT #169: VEDL @ ₹391.45 (Take Profit)
+  12:30 Opened LONG #170: ADANIGREEN @ ₹794.40 (pred: 12:30)
+  12:45 Opened LONG #171: ANGELONE @ ₹2011.35 (pred: 12:45)
+  12:45 Opened LONG #172: VEDL @ ₹400.40 (pred: 12:45)
+  12:45 Closed LONG #171: ANGELONE @ ₹2001.29 (Stop Loss)
+  12:45 Closed LONG #172: VEDL @ ₹404.40 (Take Profit)
+  13:00 Opened LONG #173: DIXON @ ₹13737.05 (pred: 13:00)
+  13:00 Closed LONG #173: DIXON @ ₹13874.42 (Take Profit)
+  13:15 Closed LONG #170: ADANIGREEN @ ₹802.34 (Take Profit)
+  14:15 Closed SHORT #168: RELIANCE @ ₹1173.44 (Stop Loss)
+  End of day: 9 trades completed
+  📈 Daily P&L: ₹17,971 (+1.50%)
+  💰 Total Capital: ₹1,216,853 (Available: ₹1,216,853)
+
+--- TRADING DAY 36: 2025-03-04 ---
+  09:45 Opened LONG #174: SBIN @ ₹713.50 (pred: 09:45)
+  09:45 Opened LONG #175: BSE @ ₹1506.50 (pred: 09:45)
+  09:45 Opened LONG #176: PFC @ ₹379.40 (pred: 09:45)
+  09:45 Closed LONG #175: BSE @ ₹1498.97 (Stop Loss)
+  10:30 Opened LONG #177: ANGELONE @ ₹2031.45 (pred: 10:30)
+  11:00 Closed LONG #176: PFC @ ₹383.19 (Take Profit)
+  11:15 Opened LONG #178: DIXON @ ₹14245.40 (pred: 11:15)
+  11:45 Closed LONG #177: ANGELONE @ ₹2021.29 (Stop Loss)
+  12:15 Closed LONG #178: DIXON @ ₹14174.17 (Stop Loss)
+  14:45 Auto-closed LONG #174: SBIN @ ₹716.50 (Avoid Close Volatility)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹111 (+0.01%)
+  💰 Total Capital: ₹1,216,965 (Available: ₹1,216,965)
+
+--- TRADING DAY 37: 2025-03-05 ---
+  09:45 Opened LONG #179: BAJFINANCE @ ₹832.00 (pred: 09:45)
+  10:15 Opened LONG #180: M&M @ ₹2704.55 (pred: 10:15)
+  10:30 Opened LONG #181: KEI @ ₹3258.00 (pred: 10:30)
+  10:30 Closed LONG #179: BAJFINANCE @ ₹840.32 (Take Profit)
+  10:45 Opened LONG #182: ADANIGREEN @ ₹825.90 (pred: 10:45)
+  11:00 Opened LONG #183: BSE @ ₹1400.00 (pred: 11:00)
+  11:00 Opened LONG #184: COFORGE @ ₹1578.00 (pred: 11:00)
+  11:00 Closed LONG #181: KEI @ ₹3290.58 (Take Profit)
+  11:00 Closed LONG #183: BSE @ ₹1414.00 (Take Profit)
+  11:00 Closed LONG #184: COFORGE @ ₹1593.78 (Take Profit)
+  11:30 Closed LONG #180: M&M @ ₹2731.60 (Take Profit)
+  12:30 Closed LONG #182: ADANIGREEN @ ₹834.16 (Take Profit)
+  End of day: 6 trades completed
+  📈 Daily P&L: ₹13,186 (+1.08%)
+  💰 Total Capital: ₹1,230,151 (Available: ₹1,230,151)
+
+--- TRADING DAY 38: 2025-03-06 ---
+  10:15 Opened LONG #185: BSE @ ₹1446.00 (pred: 10:15)
+  10:30 Closed LONG #185: BSE @ ₹1438.77 (Stop Loss)
+  12:30 Opened LONG #186: VEDL @ ₹443.80 (pred: 12:30)
+  14:45 Auto-closed LONG #186: VEDL @ ₹444.30 (Avoid Close Volatility)
+  End of day: 2 trades completed
+  📉 Daily P&L: ₹-814 (-0.07%)
+  💰 Total Capital: ₹1,229,337 (Available: ₹1,229,337)
+
+--- TRADING DAY 39: 2025-03-07 ---
+  10:15 Opened LONG #187: RELIANCE @ ₹1236.50 (pred: 10:15)
+  11:00 Closed LONG #187: RELIANCE @ ₹1248.87 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹4,909 (+0.40%)
+  💰 Total Capital: ₹1,234,246 (Available: ₹1,234,246)
+
+--- TRADING DAY 40: 2025-03-10 ---
+  09:45 Opened SHORT #188: BAJFINANCE @ ₹857.50 (pred: 09:45)
+  10:45 Opened LONG #189: BSE @ ₹1365.00 (pred: 10:45)
+  11:00 Closed LONG #189: BSE @ ₹1358.17 (Stop Loss)
+  12:30 Closed SHORT #188: BAJFINANCE @ ₹848.92 (Take Profit)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹3,266 (+0.26%)
+  💰 Total Capital: ₹1,237,511 (Available: ₹1,237,511)
+
+--- TRADING DAY 41: 2025-03-11 ---
+  10:00 Opened LONG #190: DIXON @ ₹13000.80 (pred: 10:00)
+  10:45 Closed LONG #190: DIXON @ ₹13130.81 (Take Profit)
+  11:15 Opened SHORT #191: PFC @ ₹396.00 (pred: 11:15)
+  13:00 Closed SHORT #191: PFC @ ₹392.04 (Take Profit)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹7,428 (+0.60%)
+  💰 Total Capital: ₹1,244,939 (Available: ₹1,244,939)
+
+--- TRADING DAY 42: 2025-03-13 ---
+  End of day: 0 trades completed
+  📈 Daily P&L: ₹0 (+0.00%)
+  💰 Total Capital: ₹1,244,939 (Available: ₹1,244,939)
+
+--- TRADING DAY 43: 2025-03-19 ---
+  11:30 Opened SHORT #192: BAJFINANCE @ ₹880.00 (pred: 11:30)
+  14:45 Auto-closed SHORT #192: BAJFINANCE @ ₹875.00 (Avoid Close Volatility)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹2,120 (+0.17%)
+  💰 Total Capital: ₹1,247,059 (Available: ₹1,247,059)
+
+--- TRADING DAY 44: 2025-03-20 ---
+  10:15 Opened LONG #193: BSE @ ₹1460.50 (pred: 10:15)
+  10:15 Closed LONG #193: BSE @ ₹1475.11 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹3,739 (+0.30%)
+  💰 Total Capital: ₹1,250,798 (Available: ₹1,250,798)
+
+--- TRADING DAY 45: 2025-03-21 ---
+  09:45 Opened LONG #194: DIXON @ ₹14050.25 (pred: 09:45)
+  09:45 Opened SHORT #195: BAJFINANCE @ ₹893.00 (pred: 09:45)
+  10:15 Closed SHORT #195: BAJFINANCE @ ₹884.07 (Take Profit)
+  10:45 Opened LONG #196: ADANIGREEN @ ₹962.75 (pred: 10:45)
+  10:45 Closed LONG #196: ADANIGREEN @ ₹972.38 (Take Profit)
+  11:00 Opened LONG #197: BSE @ ₹1532.50 (pred: 11:00)
+  11:00 Closed LONG #194: DIXON @ ₹13980.00 (Stop Loss)
+  11:30 Closed LONG #197: BSE @ ₹1547.83 (Take Profit)
+  End of day: 4 trades completed
+  📈 Daily P&L: ₹6,908 (+0.55%)
+  💰 Total Capital: ₹1,257,706 (Available: ₹1,257,706)
+
+--- TRADING DAY 46: 2025-03-24 ---
+  11:30 Opened LONG #198: DIXON @ ₹14469.00 (pred: 11:30)
+  11:45 Closed LONG #198: DIXON @ ₹14613.69 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹3,762 (+0.30%)
+  💰 Total Capital: ₹1,261,468 (Available: ₹1,261,468)
+
+--- TRADING DAY 47: 2025-03-25 ---
+  10:00 Opened SHORT #199: DIXON @ ₹14267.20 (pred: 10:00)
+  10:00 Closed SHORT #199: DIXON @ ₹14124.53 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹3,709 (+0.29%)
+  💰 Total Capital: ₹1,265,178 (Available: ₹1,265,178)
+
+--- TRADING DAY 48: 2025-03-26 ---
+  End of day: 0 trades completed
+  📈 Daily P&L: ₹0 (+0.00%)
+  💰 Total Capital: ₹1,265,178 (Available: ₹1,265,178)
+
+--- TRADING DAY 49: 2025-03-28 ---
+  10:00 Opened LONG #200: M&M @ ₹2648.80 (pred: 10:00)
+  12:45 Opened SHORT #201: UPL @ ₹640.00 (pred: 12:45)
+  12:45 Closed SHORT #201: UPL @ ₹633.60 (Take Profit)
+  14:45 Auto-closed LONG #200: M&M @ ₹2671.30 (Avoid Close Volatility)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹6,757 (+0.53%)
+  💰 Total Capital: ₹1,271,935 (Available: ₹1,271,935)
+
+--- TRADING DAY 50: 2025-04-01 ---
+  10:15 Opened SHORT #202: RECLTD @ ₹428.00 (pred: 10:15)
+  11:00 Closed SHORT #202: RECLTD @ ₹423.72 (Take Profit)
+  11:30 Opened SHORT #203: TRENT @ ₹5547.30 (pred: 11:30)
+  12:15 Closed SHORT #203: TRENT @ ₹5575.04 (Stop Loss)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹3,171 (+0.25%)
+  💰 Total Capital: ₹1,275,105 (Available: ₹1,275,105)
+
+--- TRADING DAY 51: 2025-04-02 ---
+  09:45 Opened SHORT #204: BEL @ ₹278.75 (pred: 09:45)
+  10:00 Closed SHORT #204: BEL @ ₹275.96 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹5,098 (+0.40%)
+  💰 Total Capital: ₹1,280,204 (Available: ₹1,280,204)
+
+--- TRADING DAY 52: 2025-04-04 ---
+  09:45 Opened SHORT #205: TATAMOTORS @ ₹623.35 (pred: 09:45)
+  10:00 Opened SHORT #206: RECLTD @ ₹412.65 (pred: 10:00)
+  10:00 Closed SHORT #205: TATAMOTORS @ ₹617.12 (Take Profit)
+  10:00 Closed SHORT #206: RECLTD @ ₹408.52 (Take Profit)
+  10:30 Opened LONG #207: CIPLA @ ₹1406.70 (pred: 10:30)
+  10:30 Closed LONG #207: CIPLA @ ₹1420.77 (Take Profit)
+  11:15 Opened LONG #208: AUROPHARMA @ ₹1103.55 (pred: 11:15)
+  11:45 Closed LONG #208: AUROPHARMA @ ₹1114.59 (Take Profit)
+  13:30 Opened SHORT #209: VEDL @ ₹404.40 (pred: 13:30)
+  14:30 Closed SHORT #209: VEDL @ ₹400.36 (Take Profit)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹21,628 (+1.69%)
+  💰 Total Capital: ₹1,301,832 (Available: ₹1,301,832)
+
+--- TRADING DAY 53: 2025-04-07 ---
+  09:45 Opened LONG #210: TATAPOWER @ ₹350.90 (pred: 09:45)
+  09:45 Opened SHORT #211: TATAMOTORS @ ₹552.85 (pred: 09:45)
+  09:45 Opened SHORT #212: BSE @ ₹1694.50 (pred: 09:45)
+  09:45 Closed SHORT #211: TATAMOTORS @ ₹547.32 (Take Profit)
+  09:45 Closed SHORT #212: BSE @ ₹1677.56 (Take Profit)
+  10:00 Closed LONG #210: TATAPOWER @ ₹349.15 (Stop Loss)
+  10:30 Opened LONG #213: PERSISTENT @ ₹4318.64 (pred: 10:30)
+  10:30 Opened LONG #214: NTPC @ ₹343.95 (pred: 10:30)
+  10:30 Opened LONG #215: TRENT @ ₹4589.89 (pred: 10:30)
+  10:30 Opened LONG #216: VOLTAS @ ₹1273.70 (pred: 10:30)
+  10:30 Opened LONG #217: RECLTD @ ₹374.45 (pred: 10:30)
+  10:30 Opened LONG #218: COFORGE @ ₹1209.50 (pred: 10:30)
+  10:30 Opened LONG #219: RELIANCE @ ₹1147.55 (pred: 10:30)
+  10:30 Closed LONG #215: TRENT @ ₹4566.94 (Stop Loss)
+  10:30 Closed LONG #217: RECLTD @ ₹372.58 (Stop Loss)
+  10:45 Opened LONG #220: DLF @ ₹617.00 (pred: 10:45)
+  10:45 Opened LONG #221: HINDALCO @ ₹561.60 (pred: 10:45)
+  10:45 Opened LONG #222: BAJFINANCE @ ₹842.50 (pred: 10:45)
+  10:45 Closed LONG #214: NTPC @ ₹342.23 (Stop Loss)
+  10:45 Closed LONG #218: COFORGE @ ₹1221.60 (Take Profit)
+  11:00 Closed LONG #213: PERSISTENT @ ₹4361.83 (Take Profit)
+  11:00 Closed LONG #216: VOLTAS @ ₹1286.44 (Take Profit)
+  11:30 Opened SHORT #223: ETERNAL @ ₹205.95 (pred: 11:30)
+  11:45 Opened SHORT #224: BHEL @ ₹206.20 (pred: 11:45)
+  11:45 Closed LONG #220: DLF @ ₹613.91 (Stop Loss)
+  12:00 Opened SHORT #225: SBIN @ ₹740.45 (pred: 12:00)
+  12:00 Closed LONG #222: BAJFINANCE @ ₹838.29 (Stop Loss)
+  12:00 Closed SHORT #224: BHEL @ ₹204.14 (Take Profit)
+  12:15 Opened SHORT #226: RELIANCE @ ₹1148.20 (pred: 12:15)
+  12:15 Closed LONG #221: HINDALCO @ ₹558.79 (Stop Loss)
+  12:15 Closed SHORT #225: SBIN @ ₹733.05 (Take Profit)
+  12:30 Closed SHORT #223: ETERNAL @ ₹203.89 (Take Profit)
+  13:30 Opened LONG #227: TATAMOTORS @ ₹571.15 (pred: 13:30)
+  13:30 Closed SHORT #226: RELIANCE @ ₹1153.94 (Stop Loss)
+  13:45 Closed LONG #227: TATAMOTORS @ ₹576.86 (Take Profit)
+  14:15 Closed LONG #219: RELIANCE @ ₹1159.03 (Take Profit)
+  End of day: 18 trades completed
+  📈 Daily P&L: ₹15,282 (+1.17%)
+  💰 Total Capital: ₹1,317,114 (Available: ₹1,317,114)
+
+--- TRADING DAY 54: 2025-04-08 ---
+  09:45 Opened SHORT #228: PFC @ ₹406.15 (pred: 09:45)
+  09:45 Opened SHORT #229: SBIN @ ₹769.55 (pred: 09:45)
+  09:45 Opened SHORT #230: RECLTD @ ₹393.95 (pred: 09:45)
+  09:45 Opened SHORT #231: TATAMOTORS @ ₹591.75 (pred: 09:45)
+  09:45 Opened SHORT #232: ETERNAL @ ₹212.26 (pred: 09:45)
+  09:45 Closed SHORT #228: PFC @ ₹402.09 (Take Profit)
+  10:15 Opened LONG #233: TRENT @ ₹4714.00 (pred: 10:15)
+  10:15 Opened LONG #234: TATAMOTORS @ ₹589.60 (pred: 10:15)
+  10:15 Closed SHORT #229: SBIN @ ₹761.85 (Take Profit)
+  10:15 Closed LONG #233: TRENT @ ₹4761.14 (Take Profit)
+  10:30 Closed SHORT #230: RECLTD @ ₹390.01 (Take Profit)
+  10:30 Closed SHORT #232: ETERNAL @ ₹213.32 (Stop Loss)
+  10:30 Closed LONG #234: TATAMOTORS @ ₹586.65 (Stop Loss)
+  10:45 Closed SHORT #231: TATAMOTORS @ ₹585.83 (Take Profit)
+  End of day: 7 trades completed
+  📈 Daily P&L: ₹11,836 (+0.90%)
+  💰 Total Capital: ₹1,328,950 (Available: ₹1,328,950)
+
+--- TRADING DAY 55: 2025-04-09 ---
+  12:45 Opened LONG #235: VEDL @ ₹372.70 (pred: 12:45)
+  12:45 Closed LONG #235: VEDL @ ₹376.43 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹3,984 (+0.30%)
+  💰 Total Capital: ₹1,332,934 (Available: ₹1,332,934)
+
+--- TRADING DAY 56: 2025-04-11 ---
+  09:45 Opened SHORT #236: TATAMOTORS @ ₹605.50 (pred: 09:45)
+  10:15 Closed SHORT #236: TATAMOTORS @ ₹599.45 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹3,996 (+0.30%)
+  💰 Total Capital: ₹1,336,930 (Available: ₹1,336,930)
+
+--- TRADING DAY 57: 2025-04-15 ---
+  End of day: 0 trades completed
+  📈 Daily P&L: ₹0 (+0.00%)
+  💰 Total Capital: ₹1,336,930 (Available: ₹1,336,930)
+
+--- TRADING DAY 58: 2025-04-16 ---
+  09:45 Opened LONG #237: TRENT @ ₹4975.50 (pred: 09:45)
+  14:45 Closed LONG #237: TRENT @ ₹5025.26 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹1,294 (+0.10%)
+  💰 Total Capital: ₹1,338,224 (Available: ₹1,338,224)
+
+--- TRADING DAY 59: 2025-04-17 ---
+  End of day: 0 trades completed
+  📈 Daily P&L: ₹0 (+0.00%)
+  💰 Total Capital: ₹1,338,224 (Available: ₹1,338,224)
+
+--- TRADING DAY 60: 2025-04-21 ---
+  10:00 Opened LONG #238: TRENT @ ₹5239.00 (pred: 10:00)
+  11:15 Closed LONG #238: TRENT @ ₹5291.39 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹3,982 (+0.30%)
+  💰 Total Capital: ₹1,342,206 (Available: ₹1,342,206)
+
+--- TRADING DAY 61: 2025-04-22 ---
+  10:15 Opened SHORT #239: DIXON @ ₹16712.00 (pred: 10:15)
+  10:30 Closed SHORT #239: DIXON @ ₹16544.88 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹2,674 (+0.20%)
+  💰 Total Capital: ₹1,344,880 (Available: ₹1,344,880)
+
+--- TRADING DAY 62: 2025-04-23 ---
+  09:45 Opened SHORT #240: DIXON @ ₹16685.00 (pred: 09:45)
+  09:45 Closed SHORT #240: DIXON @ ₹16518.15 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹2,670 (+0.20%)
+  💰 Total Capital: ₹1,347,549 (Available: ₹1,347,549)
+
+--- TRADING DAY 63: 2025-04-25 ---
+  09:45 Opened SHORT #241: BAJFINANCE @ ₹913.50 (pred: 09:45)
+  09:45 Opened SHORT #242: TATAMOTORS @ ₹663.10 (pred: 09:45)
+  09:45 Opened SHORT #243: COALINDIA @ ₹396.50 (pred: 09:45)
+  09:45 Opened SHORT #244: AXISBANK @ ₹1164.90 (pred: 09:45)
+  09:45 Opened SHORT #245: RECLTD @ ₹432.75 (pred: 09:45)
+  09:45 Opened SHORT #246: TRENT @ ₹5246.00 (pred: 09:45)
+  09:45 Opened SHORT #247: M&M @ ₹2888.50 (pred: 09:45)
+  09:45 Opened SHORT #248: VEDL @ ₹417.65 (pred: 09:45)
+  09:45 Opened SHORT #249: PFC @ ₹424.70 (pred: 09:45)
+  09:45 Opened SHORT #250: PAYTM @ ₹897.05 (pred: 09:45)
+  09:45 Opened SHORT #251: SBIN @ ₹806.95 (pred: 09:45)
+  09:45 Closed SHORT #242: TATAMOTORS @ ₹656.47 (Take Profit)
+  09:45 Closed SHORT #245: RECLTD @ ₹428.42 (Take Profit)
+  09:45 Closed SHORT #246: TRENT @ ₹5193.54 (Take Profit)
+  09:45 Closed SHORT #249: PFC @ ₹420.45 (Take Profit)
+  10:00 Opened SHORT #252: ETERNAL @ ₹232.70 (pred: 10:00)
+  10:00 Opened SHORT #253: SHRIRAMFIN @ ₹682.90 (pred: 10:00)
+  10:00 Opened SHORT #254: NTPC @ ₹357.25 (pred: 10:00)
+  10:00 Closed SHORT #241: BAJFINANCE @ ₹904.37 (Take Profit)
+  10:00 Closed SHORT #243: COALINDIA @ ₹392.53 (Take Profit)
+  10:00 Closed SHORT #244: AXISBANK @ ₹1153.25 (Take Profit)
+  10:00 Closed SHORT #247: M&M @ ₹2859.61 (Take Profit)
+  10:00 Closed SHORT #250: PAYTM @ ₹888.08 (Take Profit)
+  10:00 Closed SHORT #251: SBIN @ ₹798.88 (Take Profit)
+  10:15 Opened SHORT #255: FEDERALBNK @ ₹198.87 (pred: 10:15)
+  10:15 Closed SHORT #252: ETERNAL @ ₹230.37 (Take Profit)
+  10:15 Closed SHORT #253: SHRIRAMFIN @ ₹676.07 (Take Profit)
+  10:15 Closed SHORT #254: NTPC @ ₹353.68 (Take Profit)
+  10:30 Closed SHORT #248: VEDL @ ₹413.47 (Take Profit)
+  10:45 Closed SHORT #255: FEDERALBNK @ ₹196.88 (Take Profit)
+  11:15 Opened SHORT #256: TATAPOWER @ ₹386.00 (pred: 11:15)
+  12:15 Opened LONG #257: BAJFINANCE @ ₹908.00 (pred: 12:15)
+  13:15 Closed SHORT #256: TATAPOWER @ ₹387.93 (Stop Loss)
+  14:45 Auto-closed LONG #257: BAJFINANCE @ ₹912.00 (Avoid Close Volatility)
+  End of day: 17 trades completed
+  📈 Daily P&L: ₹18,515 (+1.37%)
+  💰 Total Capital: ₹1,366,064 (Available: ₹1,366,064)
+
+--- TRADING DAY 64: 2025-04-28 ---
+  10:00 Opened LONG #258: SHRIRAMFIN @ ₹605.25 (pred: 10:00)
+  10:15 Closed LONG #258: SHRIRAMFIN @ ₹611.30 (Take Profit)
+  10:30 Opened SHORT #259: ETERNAL @ ₹226.47 (pred: 10:30)
+  11:00 Opened SHORT #260: SBIN @ ₹808.40 (pred: 11:00)
+  12:15 Closed SHORT #260: SBIN @ ₹812.44 (Stop Loss)
+  12:45 Closed SHORT #259: ETERNAL @ ₹227.60 (Stop Loss)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹607 (+0.04%)
+  💰 Total Capital: ₹1,366,672 (Available: ₹1,366,672)
+
+--- TRADING DAY 65: 2025-04-29 ---
+  10:00 Opened LONG #261: ETERNAL @ ₹228.48 (pred: 10:00)
+  10:15 Opened SHORT #262: TATAMOTORS @ ₹677.00 (pred: 10:15)
+  10:15 Opened SHORT #263: SBIN @ ₹819.60 (pred: 10:15)
+  10:30 Closed LONG #261: ETERNAL @ ₹230.76 (Take Profit)
+  11:45 Opened SHORT #264: GODREJPROP @ ₹2117.50 (pred: 11:45)
+  11:45 Closed SHORT #262: TATAMOTORS @ ₹670.23 (Take Profit)
+  12:00 Opened SHORT #265: ETERNAL @ ₹230.75 (pred: 12:00)
+  12:15 Closed SHORT #265: ETERNAL @ ₹228.44 (Take Profit)
+  14:45 Auto-closed SHORT #263: SBIN @ ₹815.55 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #264: GODREJPROP @ ₹2100.10 (Avoid Close Volatility)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹15,145 (+1.11%)
+  💰 Total Capital: ₹1,381,817 (Available: ₹1,381,817)
+
+--- TRADING DAY 66: 2025-04-30 ---
+  09:45 Opened SHORT #266: TRENT @ ₹5185.50 (pred: 09:45)
+  09:45 Opened LONG #267: PFC @ ₹412.40 (pred: 09:45)
+  09:45 Closed SHORT #266: TRENT @ ₹5211.43 (Stop Loss)
+  10:00 Opened SHORT #268: BAJFINANCE @ ₹864.00 (pred: 10:00)
+  10:15 Opened LONG #269: TRENT @ ₹5193.00 (pred: 10:15)
+  10:15 Opened SHORT #270: SBIN @ ₹793.15 (pred: 10:15)
+  10:15 Closed LONG #267: PFC @ ₹410.34 (Stop Loss)
+  10:30 Closed SHORT #270: SBIN @ ₹785.22 (Take Profit)
+  11:45 Opened SHORT #271: GODREJPROP @ ₹2207.00 (pred: 11:45)
+  12:00 Closed SHORT #271: GODREJPROP @ ₹2184.93 (Take Profit)
+  12:15 Opened LONG #272: VBL @ ₹522.95 (pred: 12:15)
+  12:15 Closed LONG #272: VBL @ ₹528.18 (Take Profit)
+  12:30 Opened LONG #273: BAJFINANCE @ ₹860.00 (pred: 12:30)
+  13:00 Closed LONG #269: TRENT @ ₹5167.03 (Stop Loss)
+  14:00 Opened SHORT #274: PFC @ ₹408.40 (pred: 14:00)
+  14:00 Opened SHORT #275: EXIDEIND @ ₹362.85 (pred: 14:00)
+  14:00 Closed SHORT #275: EXIDEIND @ ₹359.22 (Take Profit)
+  14:45 Auto-closed SHORT #268: BAJFINANCE @ ₹865.50 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #273: BAJFINANCE @ ₹865.50 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #274: PFC @ ₹406.85 (Avoid Close Volatility)
+  End of day: 10 trades completed
+  📈 Daily P&L: ₹7,613 (+0.55%)
+  💰 Total Capital: ₹1,389,429 (Available: ₹1,389,429)
+
+--- TRADING DAY 67: 2025-05-02 ---
+  09:45 Opened LONG #276: VOLTAS @ ₹1219.70 (pred: 09:45)
+  10:15 Opened LONG #277: ETERNAL @ ₹238.33 (pred: 10:15)
+  10:30 Closed LONG #276: VOLTAS @ ₹1231.90 (Take Profit)
+  11:00 Opened SHORT #278: M&M @ ₹2952.40 (pred: 11:00)
+  11:00 Opened SHORT #279: SBIN @ ₹799.45 (pred: 11:00)
+  11:00 Closed LONG #277: ETERNAL @ ₹237.14 (Stop Loss)
+  11:15 Opened SHORT #280: MARUTI @ ₹12578.00 (pred: 11:15)
+  11:15 Opened LONG #281: BAJFINANCE @ ₹864.50 (pred: 11:15)
+  11:30 Opened SHORT #282: JSWSTEEL @ ₹988.00 (pred: 11:30)
+  11:30 Closed SHORT #279: SBIN @ ₹791.46 (Take Profit)
+  11:30 Closed SHORT #282: JSWSTEEL @ ₹978.12 (Take Profit)
+  12:00 Closed SHORT #278: M&M @ ₹2922.88 (Take Profit)
+  12:00 Closed SHORT #280: MARUTI @ ₹12452.22 (Take Profit)
+  12:15 Opened SHORT #283: ETERNAL @ ₹235.23 (pred: 12:15)
+  12:30 Opened SHORT #284: PAYTM @ ₹840.00 (pred: 12:30)
+  12:30 Closed SHORT #284: PAYTM @ ₹844.20 (Stop Loss)
+  12:45 Closed LONG #281: BAJFINANCE @ ₹873.14 (Take Profit)
+  13:15 Opened LONG #285: BAJAJFINSV @ ₹1955.00 (pred: 13:15)
+  13:15 Opened LONG #286: TRENT @ ₹5166.00 (pred: 13:15)
+  13:15 Closed LONG #285: BAJAJFINSV @ ₹1974.55 (Take Profit)
+  13:30 Closed SHORT #283: ETERNAL @ ₹236.41 (Stop Loss)
+  14:45 Auto-closed LONG #286: TRENT @ ₹5163.00 (Avoid Close Volatility)
+  End of day: 11 trades completed
+  📈 Daily P&L: ₹12,074 (+0.87%)
+  💰 Total Capital: ₹1,401,504 (Available: ₹1,401,504)
+
+--- TRADING DAY 68: 2025-05-05 ---
+  09:45 Opened LONG #287: BAJFINANCE @ ₹893.00 (pred: 09:45)
+  09:45 Opened LONG #288: TRENT @ ₹5304.00 (pred: 09:45)
+  10:00 Opened SHORT #289: GODREJPROP @ ₹2236.90 (pred: 10:00)
+  10:15 Opened LONG #290: SHRIRAMFIN @ ₹622.10 (pred: 10:15)
+  10:15 Closed LONG #288: TRENT @ ₹5357.04 (Take Profit)
+  10:30 Closed LONG #287: BAJFINANCE @ ₹901.93 (Take Profit)
+  11:15 Closed LONG #290: SHRIRAMFIN @ ₹628.32 (Take Profit)
+  11:30 Opened SHORT #291: BAJFINANCE @ ₹896.50 (pred: 11:30)
+  11:45 Closed SHORT #289: GODREJPROP @ ₹2214.53 (Take Profit)
+  12:45 Opened SHORT #292: ADANIGREEN @ ₹988.70 (pred: 12:45)
+  12:45 Closed SHORT #292: ADANIGREEN @ ₹978.81 (Take Profit)
+  14:45 Auto-closed SHORT #291: BAJFINANCE @ ₹895.50 (Avoid Close Volatility)
+  End of day: 6 trades completed
+  📈 Daily P&L: ₹13,509 (+0.96%)
+  💰 Total Capital: ₹1,415,013 (Available: ₹1,415,013)
+
+--- TRADING DAY 69: 2025-05-06 ---
+  09:45 Opened SHORT #293: M&M @ ₹3133.80 (pred: 09:45)
+  10:00 Closed SHORT #293: M&M @ ₹3102.46 (Take Profit)
+  10:15 Opened SHORT #294: BAJFINANCE @ ₹878.50 (pred: 10:15)
+  11:30 Opened SHORT #295: GODREJPROP @ ₹2132.10 (pred: 11:30)
+  13:45 Closed SHORT #294: BAJFINANCE @ ₹882.89 (Stop Loss)
+  13:45 Closed SHORT #295: GODREJPROP @ ₹2110.78 (Take Profit)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹7,476 (+0.53%)
+  💰 Total Capital: ₹1,422,489 (Available: ₹1,422,489)
+
+--- TRADING DAY 70: 2025-05-07 ---
+  09:45 Opened SHORT #296: TATAMOTORS @ ₹670.55 (pred: 09:45)
+  09:45 Opened SHORT #297: RECLTD @ ₹406.65 (pred: 09:45)
+  09:45 Opened SHORT #298: PFC @ ₹399.95 (pred: 09:45)
+  09:45 Opened SHORT #299: BANKBARODA @ ₹224.10 (pred: 09:45)
+  09:45 Closed SHORT #297: RECLTD @ ₹402.58 (Take Profit)
+  09:45 Closed SHORT #299: BANKBARODA @ ₹221.86 (Take Profit)
+  10:00 Opened SHORT #300: PAYTM @ ₹864.50 (pred: 10:00)
+  10:00 Closed SHORT #298: PFC @ ₹395.95 (Take Profit)
+  10:15 Closed SHORT #300: PAYTM @ ₹868.82 (Stop Loss)
+  11:15 Opened LONG #301: PFC @ ₹400.05 (pred: 11:15)
+  11:15 Closed SHORT #296: TATAMOTORS @ ₹673.90 (Stop Loss)
+  14:00 Closed LONG #301: PFC @ ₹404.05 (Take Profit)
+  End of day: 6 trades completed
+  📈 Daily P&L: ₹7,556 (+0.53%)
+  💰 Total Capital: ₹1,430,045 (Available: ₹1,430,045)
+
+--- TRADING DAY 71: 2025-05-08 ---
+  09:45 Opened SHORT #302: PAYTM @ ₹872.15 (pred: 09:45)
+  09:45 Closed SHORT #302: PAYTM @ ₹863.43 (Take Profit)
+  10:45 Opened LONG #303: VOLTAS @ ₹1248.90 (pred: 10:45)
+  11:00 Closed LONG #303: VOLTAS @ ₹1261.39 (Take Profit)
+  13:00 Opened SHORT #304: PFC @ ₹401.40 (pred: 13:00)
+  13:00 Opened SHORT #305: RECLTD @ ₹406.25 (pred: 13:00)
+  13:00 Closed SHORT #305: RECLTD @ ₹402.19 (Take Profit)
+  13:30 Closed SHORT #304: PFC @ ₹397.39 (Take Profit)
+  13:45 Opened SHORT #306: SBIN @ ₹775.50 (pred: 13:45)
+  14:45 Auto-closed SHORT #306: SBIN @ ₹771.50 (Avoid Close Volatility)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹23,658 (+1.65%)
+  💰 Total Capital: ₹1,453,703 (Available: ₹1,453,703)
+
+--- TRADING DAY 72: 2025-05-09 ---
+  09:45 Opened SHORT #307: BAJFINANCE @ ₹870.50 (pred: 09:45)
+  10:00 Opened SHORT #308: ETERNAL @ ₹226.28 (pred: 10:00)
+  10:15 Opened LONG #309: INDHOTEL @ ₹708.80 (pred: 10:15)
+  10:15 Closed LONG #309: INDHOTEL @ ₹715.89 (Take Profit)
+  10:30 Opened SHORT #310: TATAMOTORS @ ₹699.40 (pred: 10:30)
+  11:00 Opened LONG #311: SBIN @ ₹771.55 (pred: 11:00)
+  11:15 Closed SHORT #310: TATAMOTORS @ ₹702.90 (Stop Loss)
+  12:30 Closed SHORT #308: ETERNAL @ ₹227.41 (Stop Loss)
+  13:15 Closed SHORT #307: BAJFINANCE @ ₹861.79 (Take Profit)
+  14:45 Auto-closed LONG #311: SBIN @ ₹777.95 (Avoid Close Volatility)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹6,224 (+0.43%)
+  💰 Total Capital: ₹1,459,927 (Available: ₹1,459,927)
+
+--- TRADING DAY 73: 2025-05-12 ---
+  09:45 Opened LONG #312: SUNPHARMA @ ₹1665.00 (pred: 09:45)
+  09:45 Closed LONG #312: SUNPHARMA @ ₹1656.67 (Stop Loss)
+  10:00 Opened LONG #313: GODREJPROP @ ₹2093.40 (pred: 10:00)
+  10:15 Opened SHORT #314: SBIN @ ₹794.95 (pred: 10:15)
+  10:15 Closed LONG #313: GODREJPROP @ ₹2114.33 (Take Profit)
+  11:00 Closed SHORT #314: SBIN @ ₹798.92 (Stop Loss)
+  11:15 Opened LONG #315: SHRIRAMFIN @ ₹634.10 (pred: 11:15)
+  11:45 Closed LONG #315: SHRIRAMFIN @ ₹640.44 (Take Profit)
+  12:00 Opened SHORT #316: TATAMOTORS @ ₹714.65 (pred: 12:00)
+  12:45 Closed SHORT #316: TATAMOTORS @ ₹718.22 (Stop Loss)
+  13:15 Opened SHORT #317: VEDL @ ₹435.50 (pred: 13:15)
+  13:15 Opened SHORT #318: UPL @ ₹684.95 (pred: 13:15)
+  13:15 Closed SHORT #318: UPL @ ₹688.37 (Stop Loss)
+  14:45 Auto-closed SHORT #317: VEDL @ ₹436.30 (Avoid Close Volatility)
+  End of day: 7 trades completed
+  📈 Daily P&L: ₹2,897 (+0.20%)
+  💰 Total Capital: ₹1,462,824 (Available: ₹1,462,824)
+
+--- TRADING DAY 74: 2025-05-13 ---
+  09:45 Opened SHORT #319: BAJFINANCE @ ₹905.00 (pred: 09:45)
+  09:45 Opened SHORT #320: ETERNAL @ ₹234.50 (pred: 09:45)
+  10:15 Closed SHORT #319: BAJFINANCE @ ₹909.52 (Stop Loss)
+  14:00 Closed SHORT #320: ETERNAL @ ₹232.16 (Take Profit)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹3,219 (+0.22%)
+  💰 Total Capital: ₹1,466,043 (Available: ₹1,466,043)
+
+--- TRADING DAY 75: 2025-05-14 ---
+  11:30 Opened SHORT #321: RECLTD @ ₹398.65 (pred: 11:30)
+  11:30 Closed SHORT #321: RECLTD @ ₹394.66 (Take Profit)
+  12:15 Opened SHORT #322: PFC @ ₹408.90 (pred: 12:15)
+  12:45 Closed SHORT #322: PFC @ ₹404.81 (Take Profit)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹11,748 (+0.80%)
+  💰 Total Capital: ₹1,477,791 (Available: ₹1,477,791)
+
+--- TRADING DAY 76: 2025-05-15 ---
+  10:00 Opened SHORT #323: PERSISTENT @ ₹5646.00 (pred: 10:00)
+  10:00 Closed SHORT #323: PERSISTENT @ ₹5674.23 (Stop Loss)
+  End of day: 1 trades completed
+  📉 Daily P&L: ₹-734 (-0.05%)
+  💰 Total Capital: ₹1,477,057 (Available: ₹1,477,057)
+
+--- TRADING DAY 77: 2025-05-19 ---
+  End of day: 0 trades completed
+  📈 Daily P&L: ₹0 (+0.00%)
+  💰 Total Capital: ₹1,477,057 (Available: ₹1,477,057)
+
+--- TRADING DAY 78: 2025-05-21 ---
+  End of day: 0 trades completed
+  📈 Daily P&L: ₹0 (+0.00%)
+  💰 Total Capital: ₹1,477,057 (Available: ₹1,477,057)
+
+--- TRADING DAY 79: 2025-05-22 ---
+  End of day: 0 trades completed
+  📈 Daily P&L: ₹0 (+0.00%)
+  💰 Total Capital: ₹1,477,057 (Available: ₹1,477,057)
+
+--- TRADING DAY 80: 2025-05-30 ---
+  09:45 Opened SHORT #324: PFC @ ₹410.55 (pred: 09:45)
+  09:45 Opened SHORT #325: VEDL @ ₹441.40 (pred: 09:45)
+  09:45 Opened SHORT #326: SBIN @ ₹797.10 (pred: 09:45)
+  09:45 Opened LONG #327: ETERNAL @ ₹230.33 (pred: 09:45)
+  09:45 Closed LONG #327: ETERNAL @ ₹232.63 (Take Profit)
+  10:00 Opened SHORT #328: COALINDIA @ ₹399.85 (pred: 10:00)
+  10:15 Opened SHORT #329: TATAMOTORS @ ₹716.20 (pred: 10:15)
+  10:15 Opened SHORT #330: HINDALCO @ ₹637.35 (pred: 10:15)
+  10:30 Closed SHORT #325: VEDL @ ₹436.99 (Take Profit)
+  12:30 Closed SHORT #324: PFC @ ₹406.44 (Take Profit)
+  13:00 Closed SHORT #326: SBIN @ ₹801.09 (Stop Loss)
+  13:15 Opened LONG #331: SBIN @ ₹802.00 (pred: 13:15)
+  13:15 Opened LONG #332: PFC @ ₹407.90 (pred: 13:15)
+  13:15 Closed LONG #331: SBIN @ ₹810.02 (Take Profit)
+  14:45 Auto-closed SHORT #328: COALINDIA @ ₹398.25 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #329: TATAMOTORS @ ₹718.15 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #330: HINDALCO @ ₹634.90 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #332: PFC @ ₹409.10 (Avoid Close Volatility)
+  End of day: 9 trades completed
+  📈 Daily P&L: ₹13,602 (+0.92%)
+  💰 Total Capital: ₹1,490,659 (Available: ₹1,490,659)
+
+--- TRADING DAY 81: 2025-06-02 ---
+  10:45 Opened LONG #333: SBIN @ ₹815.35 (pred: 10:45)
+  14:45 Auto-closed LONG #333: SBIN @ ₹814.55 (Avoid Close Volatility)
+  End of day: 1 trades completed
+  📉 Daily P&L: ₹-585 (-0.04%)
+  💰 Total Capital: ₹1,490,074 (Available: ₹1,490,074)
+
+--- TRADING DAY 82: 2025-06-04 ---
+  11:30 Opened LONG #334: ETERNAL @ ₹240.12 (pred: 11:30)
+  12:00 Closed LONG #334: ETERNAL @ ₹242.52 (Take Profit)
+  End of day: 1 trades completed
+  📈 Daily P&L: ₹5,960 (+0.40%)
+  💰 Total Capital: ₹1,496,034 (Available: ₹1,496,034)
+
+--- TRADING DAY 83: 2025-06-05 ---
+  10:45 Opened SHORT #335: M&M @ ₹3046.20 (pred: 10:45)
+  10:45 Opened SHORT #336: PAYTM @ ₹964.40 (pred: 10:45)
+  10:45 Closed SHORT #335: M&M @ ₹3015.74 (Take Profit)
+  10:45 Closed SHORT #336: PAYTM @ ₹954.76 (Take Profit)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹7,764 (+0.52%)
+  💰 Total Capital: ₹1,503,798 (Available: ₹1,503,798)
+
+--- TRADING DAY 84: 2025-06-06 ---
+  10:15 Opened LONG #337: LICHSGFIN @ ₹601.20 (pred: 10:15)
+  10:15 Closed LONG #337: LICHSGFIN @ ₹598.19 (Stop Loss)
+  10:30 Opened LONG #338: RECLTD @ ₹407.50 (pred: 10:30)
+  10:30 Opened LONG #339: SBIN @ ₹811.65 (pred: 10:30)
+  10:30 Closed LONG #338: RECLTD @ ₹411.57 (Take Profit)
+  10:45 Opened LONG #340: IDFCFIRSTB @ ₹69.58 (pred: 10:45)
+  11:00 Opened LONG #341: CHOLAFIN @ ₹1553.00 (pred: 11:00)
+  11:00 Closed LONG #340: IDFCFIRSTB @ ₹70.28 (Take Profit)
+  11:00 Closed LONG #341: CHOLAFIN @ ₹1568.53 (Take Profit)
+  11:15 Opened LONG #342: PFC @ ₹415.00 (pred: 11:15)
+  11:30 Opened LONG #343: ETERNAL @ ₹261.63 (pred: 11:30)
+  11:45 Closed LONG #342: PFC @ ₹419.15 (Take Profit)
+  12:00 Closed LONG #343: ETERNAL @ ₹260.32 (Stop Loss)
+  14:45 Auto-closed LONG #339: SBIN @ ₹810.95 (Avoid Close Volatility)
+  End of day: 7 trades completed
+  📈 Daily P&L: ₹14,004 (+0.93%)
+  💰 Total Capital: ₹1,517,802 (Available: ₹1,517,802)
+
+--- TRADING DAY 85: 2025-06-09 ---
+  10:30 Opened LONG #344: RECLTD @ ₹424.45 (pred: 10:30)
+  11:15 Opened LONG #345: BDL @ ₹1937.30 (pred: 11:15)
+  12:00 Closed LONG #344: RECLTD @ ₹428.69 (Take Profit)
+  13:15 Closed LONG #345: BDL @ ₹1927.61 (Stop Loss)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹4,704 (+0.31%)
+  💰 Total Capital: ₹1,522,506 (Available: ₹1,522,506)
+
+--- TRADING DAY 86: 2025-06-10 ---
+  End of day: 0 trades completed
+  📈 Daily P&L: ₹0 (+0.00%)
+  💰 Total Capital: ₹1,522,506 (Available: ₹1,522,506)
+
+--- TRADING DAY 87: 2025-06-11 ---
+  10:15 Opened SHORT #346: UNITDSPR @ ₹1503.00 (pred: 10:15)
+  10:30 Closed SHORT #346: UNITDSPR @ ₹1487.97 (Take Profit)
+  13:30 Opened SHORT #347: RECLTD @ ₹421.45 (pred: 13:30)
+  13:45 Closed SHORT #347: RECLTD @ ₹417.24 (Take Profit)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹10,661 (+0.70%)
+  💰 Total Capital: ₹1,533,167 (Available: ₹1,533,167)
+
+--- TRADING DAY 88: 2025-06-12 ---
+  09:45 Opened LONG #348: BDL @ ₹1900.40 (pred: 09:45)
+  09:45 Opened LONG #349: PAYTM @ ₹888.65 (pred: 09:45)
+  09:45 Closed LONG #348: BDL @ ₹1919.40 (Take Profit)
+  09:45 Closed LONG #349: PAYTM @ ₹884.21 (Stop Loss)
+  10:45 Opened SHORT #350: PAYTM @ ₹904.35 (pred: 10:45)
+  11:30 Closed SHORT #350: PAYTM @ ₹908.87 (Stop Loss)
+  13:45 Opened SHORT #351: SBIN @ ₹805.20 (pred: 13:45)
+  14:45 Auto-closed SHORT #351: SBIN @ ₹806.30 (Avoid Close Volatility)
+  End of day: 4 trades completed
+  📈 Daily P&L: ₹3,033 (+0.20%)
+  💰 Total Capital: ₹1,536,200 (Available: ₹1,536,200)
+
+--- TRADING DAY 89: 2025-06-13 ---
+  10:00 Opened LONG #352: MAZDOCK @ ₹3194.00 (pred: 10:00)
+  10:15 Closed LONG #352: MAZDOCK @ ₹3225.94 (Take Profit)
+  11:45 Opened SHORT #353: PAYTM @ ₹890.50 (pred: 11:45)
+  11:45 Closed SHORT #353: PAYTM @ ₹894.95 (Stop Loss)
+  13:45 Opened LONG #354: BDL @ ₹1892.90 (pred: 13:45)
+  14:45 Auto-closed LONG #354: BDL @ ₹1892.50 (Avoid Close Volatility)
+  End of day: 3 trades completed
+  📈 Daily P&L: ₹670 (+0.04%)
+  💰 Total Capital: ₹1,536,870 (Available: ₹1,536,870)
+
+--- TRADING DAY 90: 2025-06-27 ---
+  09:45 Opened LONG #355: ADANIGREEN @ ₹1021.00 (pred: 09:45)
+  09:45 Opened SHORT #356: BAJAJFINSV @ ₹2011.30 (pred: 09:45)
+  09:45 Opened SHORT #357: PAYTM @ ₹911.75 (pred: 09:45)
+  09:45 Opened SHORT #358: SBIN @ ₹805.20 (pred: 09:45)
+  10:00 Opened LONG #359: ATGL @ ₹678.80 (pred: 10:00)
+  10:00 Opened LONG #360: RECLTD @ ₹405.95 (pred: 10:00)
+  10:00 Closed LONG #359: ATGL @ ₹685.59 (Take Profit)
+  10:15 Opened SHORT #361: DIXON @ ₹14827.00 (pred: 10:15)
+  10:15 Opened LONG #362: NATIONALUM @ ₹194.64 (pred: 10:15)
+  10:15 Opened LONG #363: HDFCBANK @ ₹2004.60 (pred: 10:15)
+  10:15 Closed SHORT #361: DIXON @ ₹14678.73 (Take Profit)
+  10:30 Closed LONG #355: ADANIGREEN @ ₹1031.21 (Take Profit)
+  10:30 Closed SHORT #356: BAJAJFINSV @ ₹2021.36 (Stop Loss)
+  10:45 Opened SHORT #364: INFY @ ₹1616.10 (pred: 10:45)
+  10:45 Closed SHORT #357: PAYTM @ ₹916.31 (Stop Loss)
+  11:15 Closed LONG #362: NATIONALUM @ ₹193.67 (Stop Loss)
+  11:30 Opened LONG #365: INDUSINDBK @ ₹846.20 (pred: 11:30)
+  11:45 Opened LONG #366: DIXON @ ₹14664.00 (pred: 11:45)
+  11:45 Closed LONG #365: INDUSINDBK @ ₹854.66 (Take Profit)
+  12:15 Opened SHORT #367: INDUSINDBK @ ₹866.25 (pred: 12:15)
+  12:30 Closed LONG #360: RECLTD @ ₹403.92 (Stop Loss)
+  12:45 Opened SHORT #368: PFC @ ₹422.20 (pred: 12:45)
+  12:45 Closed SHORT #367: INDUSINDBK @ ₹857.59 (Take Profit)
+  14:45 Closed LONG #366: DIXON @ ₹14590.68 (Stop Loss)
+  14:45 Auto-closed SHORT #358: SBIN @ ₹805.00 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #363: HDFCBANK @ ₹2012.90 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #364: INFY @ ₹1604.60 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #368: PFC @ ₹421.30 (Avoid Close Volatility)
+  End of day: 14 trades completed
+  📈 Daily P&L: ₹10,587 (+0.69%)
+  💰 Total Capital: ₹1,547,457 (Available: ₹1,547,457)
+
+--- TRADING DAY 91: 2025-06-30 ---
+  09:45 Opened SHORT #369: INFY @ ₹1598.20 (pred: 09:45)
+  09:45 Opened LONG #370: SBIN @ ₹813.30 (pred: 09:45)
+  10:00 Opened SHORT #371: BDL @ ₹1923.70 (pred: 10:00)
+  10:00 Opened SHORT #372: M&M @ ₹3185.00 (pred: 10:00)
+  10:15 Opened LONG #373: PFC @ ₹424.55 (pred: 10:15)
+  10:15 Opened LONG #374: INFY @ ₹1600.40 (pred: 10:15)
+  10:15 Opened SHORT #375: RECLTD @ ₹404.50 (pred: 10:15)
+  10:15 Closed SHORT #371: BDL @ ₹1933.32 (Stop Loss)
+  10:45 Closed LONG #373: PFC @ ₹422.43 (Stop Loss)
+  12:15 Closed SHORT #369: INFY @ ₹1606.19 (Stop Loss)
+  13:45 Opened LONG #376: DIXON @ ₹14834.00 (pred: 13:45)
+  14:00 Closed LONG #376: DIXON @ ₹14982.34 (Take Profit)
+  14:45 Auto-closed LONG #370: SBIN @ ₹820.20 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #372: M&M @ ₹3184.50 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #374: INFY @ ₹1603.60 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #375: RECLTD @ ₹403.15 (Avoid Close Volatility)
+  End of day: 8 trades completed
+  📈 Daily P&L: ₹988 (+0.06%)
+  💰 Total Capital: ₹1,548,445 (Available: ₹1,548,445)
+
+--- TRADING DAY 92: 2025-07-01 ---
+  09:45 Opened LONG #377: HAL @ ₹4932.80 (pred: 09:45)
+  09:45 Opened LONG #378: M&M @ ₹3212.00 (pred: 09:45)
+  09:45 Opened LONG #379: BDL @ ₹1989.80 (pred: 09:45)
+  10:15 Closed LONG #378: M&M @ ₹3195.94 (Stop Loss)
+  10:30 Opened LONG #380: SBIN @ ₹815.75 (pred: 10:30)
+  10:30 Closed LONG #379: BDL @ ₹1979.85 (Stop Loss)
+  11:15 Opened LONG #381: RECLTD @ ₹399.30 (pred: 11:15)
+  11:45 Opened LONG #382: UPL @ ₹670.70 (pred: 11:45)
+  11:45 Closed LONG #377: HAL @ ₹4908.14 (Stop Loss)
+  12:30 Closed LONG #380: SBIN @ ₹823.91 (Take Profit)
+  13:45 Opened LONG #383: HUDCO @ ₹239.21 (pred: 13:45)
+  14:00 Opened SHORT #384: PAYTM @ ₹928.60 (pred: 14:00)
+  14:00 Closed LONG #382: UPL @ ₹667.35 (Stop Loss)
+  14:45 Closed SHORT #384: PAYTM @ ₹933.24 (Stop Loss)
+  14:45 Auto-closed LONG #381: RECLTD @ ₹400.00 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #383: HUDCO @ ₹239.62 (Avoid Close Volatility)
+  End of day: 8 trades completed
+  📉 Daily P&L: ₹-2,908 (-0.19%)
+  💰 Total Capital: ₹1,545,537 (Available: ₹1,545,537)
+
+--- TRADING DAY 93: 2025-07-02 ---
+  09:45 Opened SHORT #385: SBIN @ ₹818.55 (pred: 09:45)
+  09:45 Opened LONG #386: INFY @ ₹1642.40 (pred: 09:45)
+  10:00 Opened SHORT #387: PFC @ ₹420.50 (pred: 10:00)
+  10:15 Opened SHORT #388: INFY @ ₹1641.90 (pred: 10:15)
+  10:15 Closed LONG #386: INFY @ ₹1634.19 (Stop Loss)
+  10:15 Closed SHORT #388: INFY @ ₹1625.48 (Take Profit)
+  10:30 Opened SHORT #389: DIXON @ ₹14765.00 (pred: 10:30)
+  11:15 Opened LONG #390: DIXON @ ₹14753.00 (pred: 11:15)
+  11:15 Opened LONG #391: RECLTD @ ₹398.80 (pred: 11:15)
+  11:15 Closed SHORT #389: DIXON @ ₹14838.82 (Stop Loss)
+  11:30 Closed LONG #390: DIXON @ ₹14900.53 (Take Profit)
+  13:15 Closed LONG #391: RECLTD @ ₹396.81 (Stop Loss)
+  13:30 Opened SHORT #392: M&M @ ₹3159.10 (pred: 13:30)
+  13:30 Closed SHORT #385: SBIN @ ₹810.36 (Take Profit)
+  14:00 Opened LONG #393: SBIN @ ₹811.35 (pred: 14:00)
+  14:45 Auto-closed SHORT #387: PFC @ ₹418.65 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #392: M&M @ ₹3166.00 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #393: SBIN @ ₹811.35 (Avoid Close Volatility)
+  End of day: 9 trades completed
+  📈 Daily P&L: ₹4,946 (+0.32%)
+  💰 Total Capital: ₹1,550,483 (Available: ₹1,550,483)
+
+--- TRADING DAY 94: 2025-07-03 ---
+  09:45 Opened LONG #394: BDL @ ₹1921.80 (pred: 09:45)
+  09:45 Closed LONG #394: BDL @ ₹1941.02 (Take Profit)
+  10:00 Opened LONG #395: OIL @ ₹445.95 (pred: 10:00)
+  10:00 Opened LONG #396: NTPC @ ₹332.25 (pred: 10:00)
+  10:30 Closed LONG #395: OIL @ ₹450.41 (Take Profit)
+  11:00 Opened SHORT #397: BANDHANBNK @ ₹184.82 (pred: 11:00)
+  11:15 Closed LONG #396: NTPC @ ₹335.57 (Take Profit)
+  13:45 Opened SHORT #398: VEDL @ ₹459.90 (pred: 13:45)
+  14:45 Auto-closed SHORT #397: BANDHANBNK @ ₹184.06 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #398: VEDL @ ₹458.60 (Avoid Close Volatility)
+  End of day: 5 trades completed
+  📈 Daily P&L: ₹18,721 (+1.21%)
+  💰 Total Capital: ₹1,569,204 (Available: ₹1,569,204)
+
+--- TRADING DAY 95: 2025-07-04 ---
+  09:45 Opened LONG #399: TRENT @ ₹5744.00 (pred: 09:45)
+  10:30 Closed LONG #399: TRENT @ ₹5715.28 (Stop Loss)
+  11:15 Opened SHORT #400: TRENT @ ₹5689.00 (pred: 11:15)
+  11:30 Closed SHORT #400: TRENT @ ₹5632.11 (Take Profit)
+  End of day: 2 trades completed
+  📈 Daily P&L: ₹2,339 (+0.15%)
+  💰 Total Capital: ₹1,571,543 (Available: ₹1,571,543)
+
+--- TRADING DAY 96: 2025-07-07 ---
+  10:00 Opened LONG #401: BDL @ ₹1944.20 (pred: 10:00)
+  10:15 Opened LONG #402: PETRONET @ ₹302.55 (pred: 10:15)
+  10:15 Closed LONG #402: PETRONET @ ₹305.58 (Take Profit)
+  11:00 Opened LONG #403: TRENT @ ₹5496.50 (pred: 11:00)
+  11:15 Opened SHORT #404: DIXON @ ₹15576.00 (pred: 11:15)
+  11:30 Closed LONG #403: TRENT @ ₹5469.02 (Stop Loss)
+  12:30 Closed SHORT #404: DIXON @ ₹15420.24 (Take Profit)
+  14:45 Auto-closed LONG #401: BDL @ ₹1947.60 (Avoid Close Volatility)
+  End of day: 4 trades completed
+  📈 Daily P&L: ₹7,155 (+0.46%)
+  💰 Total Capital: ₹1,578,698 (Available: ₹1,578,698)
+
+--- TRADING DAY 97: 2025-07-08 ---
+  10:00 Opened SHORT #405: RECLTD @ ₹394.20 (pred: 10:00)
+  11:30 Opened LONG #406: TRENT @ ₹5390.00 (pred: 11:30)
+  11:30 Opened LONG #407: KALYANKJIL @ ₹576.20 (pred: 11:30)
+  12:15 Closed LONG #407: KALYANKJIL @ ₹573.32 (Stop Loss)
+  12:30 Opened LONG #408: ANGELONE @ ₹2672.90 (pred: 12:30)
+  12:30 Closed LONG #408: ANGELONE @ ₹2659.54 (Stop Loss)
+  13:15 Opened LONG #409: HUDCO @ ₹227.30 (pred: 13:15)
+  13:30 Opened SHORT #410: DIXON @ ₹15471.00 (pred: 13:30)
+  13:30 Opened LONG #411: PAYTM @ ₹906.00 (pred: 13:30)
+  14:45 Auto-closed SHORT #405: RECLTD @ ₹394.95 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #406: TRENT @ ₹5427.00 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #409: HUDCO @ ₹228.95 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #410: DIXON @ ₹15457.00 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #411: PAYTM @ ₹912.65 (Avoid Close Volatility)
+  End of day: 7 trades completed
+  📈 Daily P&L: ₹256 (+0.02%)
+  💰 Total Capital: ₹1,578,954 (Available: ₹1,578,954)
+
+--- TRADING DAY 98: 2025-07-09 ---
+  09:45 Opened LONG #412: TRENT @ ₹5451.50 (pred: 09:45)
+  10:00 Opened SHORT #413: PERSISTENT @ ₹5769.50 (pred: 10:00)
+  11:00 Opened LONG #414: KFINTECH @ ₹1290.30 (pred: 11:00)
+  11:00 Opened LONG #415: BHEL @ ₹262.90 (pred: 11:00)
+  11:15 Closed LONG #414: KFINTECH @ ₹1303.20 (Take Profit)
+  12:15 Opened SHORT #416: VEDL @ ₹436.35 (pred: 12:15)
+  12:15 Closed SHORT #416: VEDL @ ₹438.53 (Stop Loss)
+  12:30 Opened LONG #417: IEX @ ₹206.07 (pred: 12:30)
+  12:30 Closed LONG #417: IEX @ ₹208.13 (Take Profit)
+  13:00 Opened LONG #418: VEDL @ ₹437.30 (pred: 13:00)
+  13:00 Closed LONG #412: TRENT @ ₹5424.24 (Stop Loss)
+  13:15 Closed LONG #418: VEDL @ ₹441.67 (Take Profit)
+  14:30 Closed LONG #415: BHEL @ ₹261.59 (Stop Loss)
+  14:45 Closed SHORT #413: PERSISTENT @ ₹5711.81 (Take Profit)
+  End of day: 7 trades completed
+  📈 Daily P&L: ₹3,817 (+0.24%)
+  💰 Total Capital: ₹1,582,770 (Available: ₹1,582,770)
+
+--- TRADING DAY 99: 2025-07-10 ---
+  10:30 Opened LONG #419: SBIN @ ₹813.60 (pred: 10:30)
+  10:45 Opened SHORT #420: PAYTM @ ₹928.85 (pred: 10:45)
+  11:15 Closed LONG #419: SBIN @ ₹809.53 (Stop Loss)
+  11:15 Closed SHORT #420: PAYTM @ ₹933.49 (Stop Loss)
+  11:30 Opened LONG #421: PFC @ ₹426.20 (pred: 11:30)
+  13:00 Opened SHORT #422: BDL @ ₹1896.10 (pred: 13:00)
+  13:00 Opened SHORT #423: SBIN @ ₹810.10 (pred: 13:00)
+  13:00 Closed LONG #421: PFC @ ₹430.46 (Take Profit)
+  13:15 Opened LONG #424: RECLTD @ ₹397.15 (pred: 13:15)
+  14:45 Auto-closed SHORT #422: BDL @ ₹1902.00 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #423: SBIN @ ₹808.00 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #424: RECLTD @ ₹398.05 (Avoid Close Volatility)
+  End of day: 6 trades completed
+  📈 Daily P&L: ₹3,427 (+0.22%)
+  💰 Total Capital: ₹1,586,197 (Available: ₹1,586,197)
+
+--- TRADING DAY 100: 2025-07-11 ---
+  09:45 Opened LONG #425: UPL @ ₹650.90 (pred: 09:45)
+  09:45 Opened LONG #426: HINDUNILVR @ ₹2517.00 (pred: 09:45)
+  09:45 Opened SHORT #427: BDL @ ₹1865.00 (pred: 09:45)
+  10:00 Closed SHORT #427: BDL @ ₹1846.35 (Take Profit)
+  10:30 Opened SHORT #428: INFY @ ₹1600.20 (pred: 10:30)
+  10:45 Opened SHORT #429: PFC @ ₹434.15 (pred: 10:45)
+  11:00 Opened LONG #430: BDL @ ₹1847.00 (pred: 11:00)
+  11:30 Closed LONG #430: BDL @ ₹1865.47 (Take Profit)
+  11:45 Opened SHORT #431: PAYTM @ ₹925.00 (pred: 11:45)
+  12:15 Opened LONG #432: SHRIRAMFIN @ ₹666.20 (pred: 12:15)
+  12:15 Closed SHORT #429: PFC @ ₹436.32 (Stop Loss)
+  12:30 Opened LONG #433: TRENT @ ₹5356.50 (pred: 12:30)
+  12:45 Closed LONG #425: UPL @ ₹657.41 (Take Profit)
+  14:15 Closed SHORT #431: PAYTM @ ₹929.62 (Stop Loss)
+  14:45 Auto-closed LONG #426: HINDUNILVR @ ₹2522.00 (Avoid Close Volatility)
+  14:45 Auto-closed SHORT #428: INFY @ ₹1595.00 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #432: SHRIRAMFIN @ ₹670.00 (Avoid Close Volatility)
+  14:45 Auto-closed LONG #433: TRENT @ ₹5376.50 (Avoid Close Volatility)
+  End of day: 9 trades completed
+  📈 Daily P&L: ₹7,778 (+0.49%)
+  💰 Total Capital: ₹1,593,975 (Available: ₹1,593,975)
+
+Realistic INTRADAY backtest completed!
+Total trades executed: 433
+Final capital: ₹1,593,975
+Total return: 59.40%
+
+======================================================================
+REALISTIC CONCURRENT TRADING RESULTS
+======================================================================
+Initial Capital: ₹1,000,000
+Final Capital: ₹1,593,975
+Total Return: 59.40%
+Total Trades: 433
+
+LONG Trades (Calls): 210 trades, 62.9% win rate, ₹280,494 P&L
+SHORT Trades (Puts): 223 trades, 71.3% win rate, ₹313,481 P&L
+
+GRADE PERFORMANCE:
+  Grade A: 250 trades, 76.0% win rate, ₹479,067 P&L
+  Grade B: 98 trades, 57.1% win rate, ₹82,245 P&L
+  Grade C: 59 trades, 55.9% win rate, ₹29,748 P&L
+  Grade D: 26 trades, 46.2% win rate, ₹2,916 P&L
+
+DAILY PERFORMANCE SUMMARY:
+  📊 Trading Days: 100 total
+  📈 Profitable Days: 82 (82.0%)
+  📉 Loss Days: 9 (9.0%)
+  ➖ Breakeven Days: 9
+  💰 Average Daily P&L: ₹5,940 (+0.47%)
+  🏆 Best Day: 2025-05-08 → ₹23,658 (+1.65%)
+  💸 Worst Day: 2024-10-11 → ₹-4,644 (-0.40%)
+
+📅 LAST 5 TRADING DAYS:
+  📈 2025-07-07: ₹7,155 (+0.46%)
+  📈 2025-07-08: ₹256 (+0.02%)
+  📈 2025-07-09: ₹3,817 (+0.24%)
+  📈 2025-07-10: ₹3,427 (+0.22%)
+  📈 2025-07-11: ₹7,778 (+0.49%)
+
+Results saved:
+  Realistic Trades: realistic_concurrent_trades.csv
+  Daily Profits: daily_profits.csv
+  Log File: realistic_backtest_log_20250718_233908.txt
+
+⏰ Completed at: 2025-07-18 23:39:27

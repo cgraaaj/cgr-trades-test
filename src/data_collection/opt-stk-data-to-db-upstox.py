@@ -77,7 +77,7 @@ logger = setup_logging()
 
 # Global constants
 NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
-semaphore = asyncio.Semaphore(10)  # Control concurrency
+semaphore = asyncio.Semaphore(1)  # Control concurrency
 DB_CONNECTION_STRING = config.DB_CONNECTION_STRING
 
 logger.info("=== Starting NSE Options Data Collection ===")
