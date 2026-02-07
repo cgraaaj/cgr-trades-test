@@ -20,19 +20,19 @@ from enum import Enum
 
 # Configuration constants
 TRADING_MINUTES_PER_DAY = 375  # 9:15 AM to 3:30 PM
-DEFAULT_INTERVAL = 15  # minutes
+DEFAULT_INTERVAL = 5  # minutes
 TN_RATIO_THRESHOLD = 60  # Trend-to-none ratio threshold
 DEFAULT_TRADE_DATE = "2024-07-26"
 DEFAULT_EXPIRY_DATE = "2025-05-29"
 MARKET_START_TIME = "09:15:00"
 MARKET_END_TIME = "15:30:00"
 TRADING_START_TIME = "09:30:00"
-TRADING_END_TIME = "14:00:00"
+TRADING_END_TIME = "15:00:00"
 BATCH_SIZE = 50  # Process stocks in batches
 MAX_CONCURRENT_TASKS = 10  # Limit concurrent tasks
-MAX_TIME_INTERVALS = 25
+MAX_TIME_INTERVALS = 75
 ACCEPTED_GRADES = ["A", "B", "C", "D"]
-CONSECUTIVE_WINDOW_MINUTES = 15
+CONSECUTIVE_WINDOW_MINUTES = 5
 
 # Market action constants
 bullish = ["Short Cover", "Long Buildup"]
@@ -1033,7 +1033,7 @@ async def main_optimized():
         # Get all available trading dates from database
         logger.info("Fetching available trading dates from database...")
         # trading_dates = await get_available_trading_dates()
-        trading_dates = ["2025-05-08"]
+        trading_dates = ["2025-10-16"]
 
         if not trading_dates:
             logger.error("No trading dates found in database. Exiting.")

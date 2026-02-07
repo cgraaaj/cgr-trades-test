@@ -39,7 +39,7 @@ def setup_logging():
     os.makedirs(log_dir, exist_ok=True)
     
     # Configure logging with both file and console handlers
-    log_filename = os.path.join(log_dir, f'opt_stock_data_{datetime.now().strftime("%Y%m%d")}.log')
+    log_filename = os.path.join(log_dir, f'opt_stock_data_nosync_{datetime.now().strftime("%Y%m%d")}.log')
     
     # Create formatters
     file_formatter = logging.Formatter(
@@ -81,7 +81,7 @@ NAMESPACE_STOCK = UUID("233c16a9-0a91-4c9d-adda-8a496c63a1a3")
 semaphore = asyncio.Semaphore(1)  # Control concurrency
 DB_CONNECTION_STRING = config.DB_CONNECTION_STRING
 
-logger.info("=== Starting NSE Options Data Collection ===")
+logger.info("=== Starting NSE Options Data Collection (NO SYNC) ===")
 logger.info(f"Database connection: {DB_CONNECTION_STRING.split('@')[1] if '@' in DB_CONNECTION_STRING else 'configured'}")
 
 
@@ -192,21 +192,34 @@ async def get_valid_instrument_tickdata(
         return None
 
 
-def generate_dates(start_date, holidays, end_date):
-    """Generate valid trading dates, excluding weekends and holidays."""
+def generate_dates(start_date, holidays, end_date, force=False):
+    """Generate valid trading dates, excluding weekends and holidays.
+    
+    Args:
+        start_date: Start date in YYYY-MM-DD format
+        holidays: List of holiday dates to exclude
+        end_date: End date in YYYY-MM-DD format
+        force: If True, include all dates regardless of weekends/holidays
+    """
     try:
         logger.info(f"Generating trading dates from {start_date} to {end_date}")
-        start_date = datetime.strptime(start_date, "%Y-%m-%d")
-        end_date = datetime.strptime(end_date, "%Y-%m-%d")
-        all_dates = pd.date_range(start=start_date, end=end_date)
+        start_date_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date_dt = datetime.strptime(end_date, "%Y-%m-%d")
+        all_dates = pd.date_range(start=start_date_dt, end=end_date_dt)
 
-        trading_dates = [
-            d.strftime("%Y-%m-%d")
-            for d in all_dates
-            if d.weekday() < 5 and d.strftime("%Y-%m-%d") not in holidays
-        ]
+        if force:
+            # Force mode: include all dates regardless of weekends/holidays
+            trading_dates = [d.strftime("%Y-%m-%d") for d in all_dates]
+            logger.info(f"FORCE MODE: Including all {len(trading_dates)} dates (ignoring weekends/holidays)")
+        else:
+            # Normal mode: exclude weekends and holidays
+            trading_dates = [
+                d.strftime("%Y-%m-%d")
+                for d in all_dates
+                if d.weekday() < 5 and d.strftime("%Y-%m-%d") not in holidays
+            ]
+            logger.info(f"Generated {len(trading_dates)} trading dates (excluding weekends/holidays)")
         
-        logger.info(f"Generated {len(trading_dates)} trading dates")
         logger.debug(f"Trading dates: {trading_dates}")
         return trading_dates
     except Exception as e:
@@ -268,8 +281,6 @@ async def process_instrument(instrument_df, session, date):
     
     return result_df
 
-
-# Remove the complex global tracking - keep only the simple approach
 
 def get_id(x, tbl_stock):
     """Fetch stock ID based on trading symbol."""
@@ -356,48 +367,19 @@ def write_to_sql_postgres(df, table_name, engine, schema="options"):
         raise
 
 
-def sync_instrument_to_ticker(engine):
-    """Sync instrument_to_ticker table with new ticker data."""
-    logger.info("Starting instrument_to_ticker sync...")
-    start_time = time.time()
-
-    query = text(
-        """
-        INSERT INTO options.instrument_to_ticker (instrument_id, ticker_id, stock_id, instrument_type, strike_price, expiry, trade_date)
-        SELECT 
-            i.id AS instrument_id,
-            t.id AS ticker_id,
-            i.stock_id,
-            i.instrument_type,
-            i.strike_price,
-            i.expiry,
-            DATE(t.time_stamp) AS trade_date
-        FROM options.ticker t
-        JOIN options.instrument i ON t.instrument_id = i.id
-        LEFT JOIN options.instrument_to_ticker it ON t.id = it.ticker_id
-        WHERE it.ticker_id IS NULL
+async def main(date_strs, force=False):
+    """Main execution pipeline (WITHOUT instrument_to_ticker sync).
+    
+    Args:
+        date_strs: List containing script name and date arguments
+        force: If True, bypass weekend/holiday filtering
     """
-    )
-
-    try:
-        with engine.connect() as connection:
-            result = connection.execute(query)
-            connection.commit()
-            
-            sync_time = time.time() - start_time
-            logger.info(f"Inserted {result.rowcount} missing records in {sync_time:.2f} seconds")
-            logger.info("Sync completed successfully!")
-            
-    except Exception as e:
-        logger.error(f"Error during sync: {e}")
-        raise
-
-
-async def main(date_strs):
-    """Main execution pipeline."""
     script_start_time = time.time()
     
     try:
+        if force:
+            logger.info("*** FORCE MODE ENABLED - Will include weekends/holidays ***")
+        
         if len(date_strs) > 2:
             logger.info(f"Running program for date range: {date_strs[1]} to {date_strs[2]}")
         else:
@@ -429,7 +411,7 @@ async def main(date_strs):
             tbl_stock = query_to_dataframe("SELECT * FROM options.stock", conn)
             logger.info(f"Loaded {len(tbl_stock)} stocks from database")
 
-        instrument_file_path = "/home/cgraaaj/Projects/cgr-trades/python/NSE.json"
+        instrument_file_path = "/home/cgraaaj/cgr-trades/python/NSE.json"
         logger.info(f"Loading instrument data from: {instrument_file_path}")
         
         with open(instrument_file_path, "r") as file:
@@ -480,9 +462,9 @@ async def main(date_strs):
         
         # Generate trading dates
         if len(date_strs) > 2:
-            dates = generate_dates(date_strs[1], nse_holidays_2026, date_strs[2])
+            dates = generate_dates(date_strs[1], nse_holidays_2026, date_strs[2], force=force)
         else:
-            dates = generate_dates(date_strs[1], nse_holidays_2026, date_strs[1])
+            dates = generate_dates(date_strs[1], nse_holidays_2026, date_strs[1], force=force)
 
         # Process instrument data
         logger.info("Processing instrument data...")
@@ -543,12 +525,8 @@ async def main(date_strs):
         else:
             logger.warning("No ticker data to store")
 
-        # Wait before sync (original behavior)
-        logger.info("Waiting 10 seconds before sync...")
-        time.sleep(10)
-
-        # Sync instrument to ticker relationships
-        sync_instrument_to_ticker(engine)
+        # SKIPPED: instrument_to_ticker sync (will be done separately later)
+        logger.info("SKIPPED: instrument_to_ticker sync (run separately when ready)")
         
         # Calculate and log execution metrics
         total_time = time.time() - script_start_time
@@ -557,7 +535,7 @@ async def main(date_strs):
         logger.info(f"Processed {len(dates)} trading dates")
         logger.info(f"Processed {len(instrument_df)} instruments")
         logger.info(f"Collected {len(ticker_df)} ticker records")
-        logger.info("=== Script completed successfully ===")
+        logger.info("=== Script completed successfully (NO SYNC) ===")
         
     except Exception as e:
         logger.error(f"Critical error in main execution: {e}")
@@ -566,7 +544,7 @@ async def main(date_strs):
         raise
 
 
-def load_nse_instrument_keys(nse_file_path: str = "/home/cgraaaj/Projects/cgr-trades/python/NSE.json") -> dict:
+def load_nse_instrument_keys(nse_file_path: str = "/home/cgraaaj/cgr-trades/python/NSE.json") -> dict:
     """Load NSE.json data and create stock name to instrument key mapping."""
     try:
         logger.info(f"Loading NSE instrument keys from: {nse_file_path}")
@@ -630,7 +608,7 @@ def instrument_downloader():
         logger.info(f"Decompressed {len(data)} instrument records")
 
         # Save the JSON data to a file
-        output_path = "/home/cgraaaj/Projects/cgr-trades/python/NSE.json"
+        output_path = "/home/cgraaaj/cgr-trades/python/NSE.json"
         logger.info(f"Saving to: {output_path}")
         
         with open(output_path, "w", encoding="utf-8") as json_file:
@@ -929,19 +907,30 @@ if __name__ == "__main__":
     
     try:
         # Parse command line arguments
-        if len(sys.argv) > 1:
-            date_args = sys.argv
+        # Usage: script.py <start_date> [end_date] [--force]
+        # --force: Include all dates regardless of weekends/holidays
+        
+        force_mode = "--force" in sys.argv
+        
+        # Remove --force from args for date parsing
+        args = [arg for arg in sys.argv if arg != "--force"]
+        
+        if len(args) > 1:
+            date_args = args
             logger.info(f"Command line arguments: {date_args[1:]}")
         else:
             date_args = ["script_name", datetime.today().strftime("%Y-%m-%d")]
             logger.info(f"No arguments provided, using today's date: {date_args[1]}")
         
+        if force_mode:
+            logger.info("--force flag detected: Will include weekends/holidays")
+        
         # Run main function
-        asyncio.run(main(date_args))
+        asyncio.run(main(date_args, force=force_mode))
         
         # Log final execution time
         total_execution_time = (time.time() - start_time) / 60
-        logger.info(f"=== SCRIPT COMPLETED SUCCESSFULLY ===")
+        logger.info(f"=== SCRIPT COMPLETED SUCCESSFULLY (NO SYNC) ===")
         logger.info(f"Total execution time: {total_execution_time:.2f} minutes")
         
     except KeyboardInterrupt:
